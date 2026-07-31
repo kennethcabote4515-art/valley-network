@@ -1,0 +1,2644 @@
+<!DOCTYPE html>
+<html lang="en" class="no-js">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Valley Network — Trusted vendors for Oahu real estate agents</title>
+<meta name="description" content="Valley Network is a trusted vendor directory that helps Oahu contractors and photographers get warm referrals from real estate agents." />
+
+<script>
+  /* Flag so CSS only hides sections for the scroll dissolve when JS is running.
+     Without this, a JS failure would leave the whole page invisible. */
+  document.documentElement.className = 'js';
+</script>
+
+<style>
+/* ============================================================================
+   1. DESIGN TOKENS
+   Deep ocean navy grounds the page and clearly dominates. Warm sand/stone
+   neutrals carry the light sections. Aged brass is the ONLY accent and is
+   rationed — see the gold audit note in section 5.
+   ========================================================================== */
+:root {
+  --ink:        #0B1620;
+  --ink-2:      #132330;
+  --ink-3:      #1D3040;
+
+  --sand:       #EDE5D8;
+  --sand-2:     #F7F3EC;
+  --sand-3:     #E3D8C6;
+  --stone:      #8C8375;   /* muted stone — secondary text + labels on light */
+  --stone-dim:  #77848E;   /* muted slate — secondary text + labels on dark */
+
+  --brass:      #A9834B;   /* rationed: CTAs and interactive states only */
+  --brass-2:    #C9A465;
+
+  --line-light: rgba(11, 22, 32, 0.13);
+  --line-dark:  rgba(237, 229, 216, 0.15);
+
+  --font-serif: "Didot", "Bodoni MT", "Hoefler Text", "Baskerville", Georgia, "Times New Roman", serif;
+  --font-sans:  -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+
+  /* Multi-layered shadows — a tight close shadow plus soft wide ones, so cards
+     read as genuinely lifted off the background rather than stamped onto it. */
+  --shadow-card:
+      0 1px 2px rgba(11, 22, 32, 0.05),
+      0 6px 16px rgba(11, 22, 32, 0.07),
+      0 22px 44px rgba(11, 22, 32, 0.09),
+      0 48px 90px rgba(11, 22, 32, 0.07);
+  --shadow-card-dark:
+      0 1px 2px rgba(0, 0, 0, 0.28),
+      0 8px 22px rgba(0, 0, 0, 0.26),
+      0 28px 58px rgba(0, 0, 0, 0.30),
+      0 60px 110px rgba(0, 0, 0, 0.26);
+  --shadow-nav:
+      0 1px 1px rgba(11, 22, 32, 0.12),
+      0 10px 30px rgba(11, 22, 32, 0.18);
+
+  /* Fine-grain noise, inline SVG — no network request. Reused everywhere
+     depth is needed so backgrounds never read as one flat CSS color. */
+  --noise: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='180' height='180'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='4' stitchTiles='stitch'/></filter><rect width='180' height='180' filter='url(%23n)' opacity='0.55'/></svg>");
+
+  /* MOTION SYSTEM — one curve, a small set of durations. Everything that moves
+     on this page pulls from here so the whole thing reads as one system rather
+     than a pile of per-element effects. Scale duration to the size of the thing
+     moving: a nav underline is --t-quick, a whole section is --t-slow. */
+  --ease:    cubic-bezier(0.22, 0.61, 0.36, 1);
+  --t-quick: 200ms;   /* small UI: underlines, tab panes */
+  --t-base:  320ms;   /* list items, confirmation lines */
+  --t-slow:  520ms;   /* whole sections */
+  --stagger: 70ms;    /* gap between siblings in a cascade */
+
+  --maxw: 1240px;
+  --gutter: clamp(20px, 5vw, 68px);
+}
+
+/* ============================================================================
+   2. RESET + BASE
+   ========================================================================== */
+*, *::before, *::after { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; scroll-behavior: smooth; }
+body {
+  margin: 0;
+  background: var(--ink);
+  color: var(--ink);
+  font-family: var(--font-sans);
+  font-size: 17px;
+  line-height: 1.65;
+  -webkit-font-smoothing: antialiased;
+  /* clip, not hidden: `overflow-x: hidden` makes body a scroll container, which
+     breaks `position: sticky` on descendants — and How It Works depends on it.
+     `clip` gives the same horizontal-overflow protection without that. The
+     hidden line stays first as a fallback for browsers without clip. */
+  overflow-x: hidden;
+  overflow-x: clip;
+}
+img { max-width: 100%; display: block; }
+h1, h2, h3 { font-family: var(--font-serif); font-weight: 400; margin: 0; }
+p { margin: 0; }
+a { color: inherit; }
+
+:focus-visible { outline: 2px solid var(--brass); outline-offset: 3px; border-radius: 2px; }
+
+.skip-link {
+  position: absolute; left: -9999px; top: 0; z-index: 999;
+  background: var(--ink); color: var(--sand);
+  padding: 12px 20px; font-size: 14px; letter-spacing: 0.06em;
+}
+.skip-link:focus { left: 8px; top: 8px; }
+
+/* ============================================================================
+   3. SECTIONS — layered, never one flat color
+   Each section gets a soft directional gradient within its own tone plus a
+   faint grain overlay, so the background has quiet depth.
+   Vertical padding is DELIBERATELY uneven: --pad is set per section so the
+   major moments (About, Why Oahu) breathe more than the minor ones (Founder).
+   ========================================================================== */
+.section {
+  position: relative;
+  padding: var(--pad, clamp(84px, 11vw, 148px)) 0;
+  isolation: isolate;
+}
+.section::after {
+  content: "";
+  position: absolute; inset: 0; z-index: 0;
+  pointer-events: none;
+  background-image: var(--noise);
+  opacity: var(--grain, 0.05);
+}
+.section > .wrap { position: relative; z-index: 1; }
+
+.wrap { width: 100%; max-width: var(--maxw); margin: 0 auto; padding: 0 var(--gutter); }
+
+/* Light ground: cream warming a shade toward one edge, not a solid fill. */
+.section--sand {
+  color: var(--ink);
+  background:
+    radial-gradient(78% 62% at 96% 4%, rgba(169, 131, 75, 0.07) 0%, rgba(169, 131, 75, 0) 62%),
+    radial-gradient(70% 58% at 2% 100%, rgba(11, 22, 32, 0.05) 0%, rgba(11, 22, 32, 0) 60%),
+    linear-gradient(168deg, #FAF7F2 0%, #F3EEE4 52%, #E9E0D1 100%);
+}
+.section--sand-deep {
+  color: var(--ink);
+  background:
+    radial-gradient(66% 56% at 6% 0%, rgba(255, 255, 255, 0.75) 0%, rgba(255, 255, 255, 0) 58%),
+    linear-gradient(196deg, #EFE8DC 0%, #E7DECE 60%, #DED2BE 100%);
+}
+/* Dark ground: navy with light pooling off one corner. */
+.section--dark {
+  color: var(--sand);
+  --grain: 0.13;
+  background:
+    radial-gradient(84% 66% at 88% 0%, rgba(201, 164, 101, 0.10) 0%, rgba(201, 164, 101, 0) 58%),
+    radial-gradient(72% 60% at 4% 96%, rgba(237, 229, 216, 0.07) 0%, rgba(237, 229, 216, 0) 60%),
+    linear-gradient(172deg, #14242F 0%, #0B1620 58%, #070E14 100%);
+}
+
+/* Hairline seams between grounds — reads as a printed edge, not a color jump. */
+.section--dark + .section--sand::before,
+.section--dark + .section--sand-deep::before {
+  content: ""; position: absolute; top: 0; left: 0; right: 0; height: 1px;
+  background: linear-gradient(to right, transparent, rgba(11,22,32,0.22), transparent);
+}
+
+/* Editorial small-caps label. Deliberately NOT gold — see gold audit. */
+.label {
+  font-family: var(--font-sans);
+  font-size: 11px; font-weight: 600;
+  letter-spacing: 0.24em; text-transform: uppercase;
+  color: var(--stone);
+  margin: 0 0 22px;
+  display: flex; align-items: center; gap: 14px;
+}
+.label::after { content: ""; height: 1px; width: 40px; background: currentColor; opacity: 0.42; }
+.section--dark .label { color: var(--stone-dim); }
+
+.h-display { font-size: clamp(52px, 10.5vw, 128px); line-height: 0.92; letter-spacing: -0.02em; }
+.h-1 { font-size: clamp(33px, 5.2vw, 60px); line-height: 1.06; letter-spacing: -0.015em; }
+.h-2 { font-size: clamp(25px, 3.2vw, 36px); line-height: 1.18; letter-spacing: -0.01em; }
+.h-3 { font-size: clamp(19px, 2.1vw, 23px); line-height: 1.3; }
+
+.lede { font-size: clamp(18px, 2.05vw, 21px); line-height: 1.6; }
+.muted { color: var(--stone); }
+.section--dark .muted { color: var(--stone-dim); }
+.measure { max-width: 62ch; }
+.measure-tight { max-width: 44ch; }
+
+/* ============================================================================
+   4. GLASS — nav and content cards only. Never a full-page background.
+   ========================================================================== */
+.glass {
+  background: rgba(237, 229, 216, 0.09);
+  -webkit-backdrop-filter: blur(20px) saturate(135%);
+  backdrop-filter: blur(20px) saturate(135%);
+  border: 1px solid rgba(237, 229, 216, 0.17);
+  border-radius: 3px;
+  box-shadow: var(--shadow-card-dark);
+}
+.glass-light {
+  background: rgba(255, 255, 255, 0.52);
+  -webkit-backdrop-filter: blur(20px) saturate(135%);
+  backdrop-filter: blur(20px) saturate(135%);
+  border: 1px solid rgba(255, 255, 255, 0.65);
+  border-radius: 3px;
+  box-shadow: var(--shadow-card);
+}
+/* Top highlight edge — sells the "pane of glass" read. */
+.glass::before, .glass-light::before {
+  content: ""; position: absolute; top: 0; left: 12px; right: 12px; height: 1px;
+  background: linear-gradient(to right, transparent, rgba(255,255,255,0.5), transparent);
+}
+.glass, .glass-light { position: relative; }
+
+/* Cursor-reactive glow — mouse/trackpad only, never touch, never under reduced
+   motion (initCardGlow gates the listeners on the same conditions). A soft
+   radial highlight tracks the pointer inside the card. Chosen over a tilt
+   because it stays quiet at any card size and costs one background repaint
+   instead of a transform on a backdrop-filtered element. */
+@media (hover: hover) and (pointer: fine) {
+  .glass::after, .glass-light::after {
+    content: ""; position: absolute; inset: 0; z-index: 0;
+    border-radius: inherit; pointer-events: none;
+    opacity: 0; transition: opacity 340ms ease;
+    background: radial-gradient(240px circle at var(--mx, 50%) var(--my, 50%),
+                rgba(201, 164, 101, 0.17), rgba(201, 164, 101, 0) 64%);
+  }
+  .glass-light::after {
+    background: radial-gradient(240px circle at var(--mx, 50%) var(--my, 50%),
+                rgba(169, 131, 75, 0.14), rgba(169, 131, 75, 0) 64%);
+  }
+  .glass:hover::after, .glass-light:hover::after { opacity: 1; }
+  /* The waitlist card is a form — a highlight chasing the cursor across the
+     inputs while someone is filling them in is noise, not polish. */
+  .form-shell::after { content: none; }
+
+  .track { transition: transform 420ms var(--ease), box-shadow 420ms ease; }
+  .track:hover { transform: translateY(-3px); }
+}
+/* Lift card contents above the glow layer so the highlight never washes over
+   text. Direct children only — cheap, and enough. */
+.glass > *, .glass-light > * { position: relative; z-index: 1; }
+
+/* ============================================================================
+   5. BUTTONS
+   GOLD AUDIT: brass now appears ONLY on primary CTAs, the active waitlist tab,
+   the confirmation check, input focus, and the footer email link. It was
+   removed from every section label, step number, category tag, the hero
+   accent word, and the wordmark so it stays rare enough to feel earned.
+   ========================================================================== */
+.btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 10px;
+  font-family: var(--font-sans);
+  font-size: 12px; font-weight: 600; letter-spacing: 0.16em; text-transform: uppercase;
+  padding: 17px 30px; border: 1px solid transparent; border-radius: 2px;
+  cursor: pointer; text-decoration: none; white-space: nowrap;
+  transition: background 280ms ease, color 280ms ease, border-color 280ms ease,
+              transform 280ms ease, box-shadow 280ms ease;
+}
+.btn--brass {
+  position: relative; overflow: hidden;
+  background: var(--brass); color: #FFF9EF;
+  box-shadow: 0 1px 2px rgba(11,22,32,0.14), 0 8px 22px rgba(169,131,75,0.24);
+}
+.btn--brass:hover {
+  background: var(--brass-2); transform: translateY(-1px);
+  box-shadow: 0 2px 4px rgba(11,22,32,0.16), 0 14px 30px rgba(169,131,75,0.30);
+}
+/* Fill-sweep on the primary CTA only. The outline and ghost buttons keep their
+   existing restrained hover so this stays the one button with the most weight —
+   same reasoning as the gold audit: the effect only works while it is rare. */
+.btn--brass::after {
+  content: ""; position: absolute; inset: 0; pointer-events: none;
+  background: linear-gradient(105deg,
+    rgba(255, 249, 239, 0) 28%,
+    rgba(255, 249, 239, 0.20) 50%,
+    rgba(255, 249, 239, 0) 72%);
+  transform: translateX(-130%);
+  transition: transform 620ms var(--ease);
+}
+.btn--brass:hover::after { transform: translateX(130%); }
+.btn--outline-light { border-color: rgba(237, 229, 216, 0.36); color: var(--sand); background: transparent; }
+.btn--outline-light:hover { border-color: var(--sand); background: rgba(237, 229, 216, 0.07); transform: translateY(-1px); }
+.btn--ink { background: var(--ink); color: var(--sand); }
+.btn--ink:hover { background: var(--ink-3); transform: translateY(-1px); }
+.btn--sm { padding: 12px 20px; font-size: 11px; }
+.btn--block { width: 100%; }
+
+/* ============================================================================
+   6. NAVIGATION — sticky the entire scroll, frosted glass over whatever passes
+   underneath. The waitlist CTA never leaves the screen.
+   ========================================================================== */
+.nav {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+  background: rgba(11, 22, 32, 0.46);
+  -webkit-backdrop-filter: blur(22px) saturate(150%);
+  backdrop-filter: blur(22px) saturate(150%);
+  border-bottom: 1px solid rgba(237, 229, 216, 0.09);
+  transition: background 420ms ease, box-shadow 420ms ease, border-color 420ms ease;
+}
+.nav.is-scrolled {
+  background: rgba(9, 18, 26, 0.86);
+  border-bottom-color: rgba(237, 229, 216, 0.14);
+  box-shadow: var(--shadow-nav);
+}
+.nav__inner {
+  max-width: var(--maxw); margin: 0 auto; padding: 0 var(--gutter);
+  height: 68px; display: flex; align-items: center; justify-content: space-between; gap: 18px;
+}
+.wordmark {
+  font-family: var(--font-serif); font-size: 20px; letter-spacing: 0.02em;
+  color: var(--sand); text-decoration: none; white-space: nowrap;
+}
+.wordmark small {
+  display: block; font-family: var(--font-sans); font-size: 8.5px;
+  letter-spacing: 0.3em; text-transform: uppercase; color: var(--stone-dim);
+  margin-top: -2px;
+}
+.nav__links { display: none; gap: 34px; align-items: center; }
+.nav__links a {
+  position: relative;
+  font-size: 12px; letter-spacing: 0.14em; text-transform: uppercase;
+  color: rgba(237, 229, 216, 0.68); text-decoration: none; transition: color 250ms ease;
+}
+.nav__links a:hover { color: var(--sand); }
+/* Underline draws in from the left on hover and retracts to the right on exit —
+   the origin flip is what makes it read as drawn rather than simply scaled.
+   Hairline and slightly transparent: a detail, not a statement. */
+.nav__links a::after {
+  content: ""; position: absolute; left: 0; right: 0; bottom: -5px; height: 1px;
+  background: currentColor; opacity: 0.5;
+  transform: scaleX(0); transform-origin: right center;
+  transition: transform var(--t-base) var(--ease);
+}
+.nav__links a:hover::after,
+.nav__links a:focus-visible::after { transform: scaleX(1); transform-origin: left center; }
+@media (min-width: 940px) { .nav__links { display: flex; } }
+
+/* Nav actions. "Get in Touch" is deliberately the quieter of the two: it picks
+   up the nav's own frosted treatment (translucent sand, blurred) instead of the
+   brass fill, so the waitlist CTA stays the only primary action up here and the
+   gold accent stays rationed. */
+.nav__actions { display: flex; align-items: center; gap: 10px; }
+.btn--ghost {
+  border-color: rgba(237, 229, 216, 0.26);
+  color: rgba(237, 229, 216, 0.80);
+  background: rgba(237, 229, 216, 0.06);
+  -webkit-backdrop-filter: blur(10px) saturate(130%);
+  backdrop-filter: blur(10px) saturate(130%);
+}
+.btn--ghost:hover {
+  border-color: rgba(237, 229, 216, 0.50);
+  color: var(--sand);
+  background: rgba(237, 229, 216, 0.11);
+  transform: translateY(-1px);
+}
+/* Below 600px the wordmark plus both buttons crowd the bar — the primary CTA wins. */
+.nav__secondary { display: none; }
+@media (min-width: 600px) { .nav__secondary { display: inline-flex; } }
+
+/* ============================================================================
+   7. IMAGE / VIDEO SLOTS
+   Composed while empty: correct aspect ratio, palette-matched tone, inset
+   frame line and a soft light sweep so they read as placed art, not gaps.
+   ========================================================================== */
+.slot {
+  position: relative; margin: 0; overflow: hidden;
+  border-radius: 3px; isolation: isolate;
+  background: linear-gradient(158deg, #1B2E3C 0%, #101F2B 52%, #0A141C 100%);
+  box-shadow: var(--shadow-card-dark);
+}
+.slot--light {
+  background: linear-gradient(158deg, #E9E0D0 0%, #DFD3BF 55%, #D2C4AC 100%);
+  box-shadow: var(--shadow-card);
+}
+/* Light sweep + grain: makes an empty slot feel like an unexposed photograph. */
+.slot::before {
+  content: ""; position: absolute; inset: 0; z-index: 1;
+  background:
+    radial-gradient(66% 54% at 72% 12%, rgba(201, 164, 101, 0.20) 0%, rgba(201, 164, 101, 0) 62%),
+    radial-gradient(78% 60% at 8% 100%, rgba(237, 229, 216, 0.12) 0%, rgba(237, 229, 216, 0) 58%);
+}
+.slot--light::before {
+  background:
+    radial-gradient(66% 54% at 74% 10%, rgba(255, 255, 255, 0.65) 0%, rgba(255, 255, 255, 0) 62%),
+    radial-gradient(70% 56% at 6% 100%, rgba(11, 22, 32, 0.10) 0%, rgba(11, 22, 32, 0) 58%);
+}
+.slot::after {
+  content: ""; position: absolute; inset: 0; z-index: 2;
+  background-image: var(--noise); opacity: 0.09; pointer-events: none;
+}
+.slot__frame {
+  position: absolute; inset: 16px; z-index: 3;
+  border: 1px solid rgba(237, 229, 216, 0.13); pointer-events: none;
+}
+.slot--light .slot__frame { border-color: rgba(11, 22, 32, 0.10); }
+.slot__meta {
+  position: absolute; left: 30px; bottom: 26px; z-index: 4;
+  font-size: 9.5px; letter-spacing: 0.22em; text-transform: uppercase;
+  color: rgba(237, 229, 216, 0.42); line-height: 1.8;
+}
+.slot--light .slot__meta { color: rgba(11, 22, 32, 0.34); }
+.slot__meta b { display: block; font-weight: 600; color: rgba(237, 229, 216, 0.62); }
+.slot--light .slot__meta b { color: rgba(11, 22, 32, 0.5); }
+/* Oversized on purpose: the extra 9% top/bottom is the headroom the parallax
+   drift moves within, so the frame never exposes an edge mid-scroll. */
+.slot__media {
+  position: absolute; left: 0; z-index: 1;
+  top: -9%; width: 100%; height: 118%;
+  object-fit: cover;
+  transform-origin: center center;
+  backface-visibility: hidden;
+  will-change: transform;
+}
+.slot.is-filled::before, .slot.is-filled .slot__meta { display: none; }
+
+/* ============================================================================
+   8. HERO — full-bleed image slot, content offset left, floating glass card
+   ========================================================================== */
+.hero {
+  position: relative; min-height: 100svh;
+  display: flex; align-items: flex-end;
+  padding: 150px 0 clamp(52px, 8vw, 104px);
+  background: var(--ink); color: var(--sand);
+  overflow: hidden; isolation: isolate;
+}
+/* Full-bleed backdrop layer for the hero image slot.
+   (Slot marker lives in the JS component — CSS comments can't nest.) */
+.hero__slot { position: absolute; inset: 0; z-index: 0; border-radius: 0; box-shadow: none; }
+/* Headroom for the hero's wider drift range (see initParallax), but only just:
+   every extra percent of height makes the box more portrait, and a 16:9 clip
+   cover-fitted into a portrait box loses width fast. 10% each side against a
+   9% drift is the most the composition can pay for.
+
+   object-position is the important part. Centre-cropping this frame throws
+   away both the ocean on the left and the far end of the house on the right,
+   landing the headline on bright glass. Biasing to 34% keeps the dusk ocean
+   and horizon behind the text column — quiet, dark, and the reason the scrim
+   above can afford to be as light as it now is. */
+.hero__slot .slot__media {
+  top: -10%; height: 120%;
+  object-position: 34% center;
+}
+/* Must match CONFIG.portrait.media. The portrait asset is composed for a tall
+   frame — sky, house, foreground stacked — so it wants a centred crop; the 34%
+   bias above exists only to rescue the landscape frame and would push this one
+   off its own axis. */
+@media (max-aspect-ratio: 3/4) {
+  .hero__slot .slot__media { object-position: center; }
+}
+.hero__slot .slot__frame { inset: clamp(14px, 2.4vw, 30px); }
+.hero__slot .slot__meta { left: auto; right: clamp(28px, 4vw, 54px); bottom: clamp(26px, 4vw, 44px); text-align: right; }
+/* Scrim, retuned for real photography.
+   The generated frame is already dark on its left third (dusk ocean and sky),
+   so the heavy 0.94 wash the placeholder needed is now doing nothing but
+   hiding the image. This version leans on the picture's own falloff: enough
+   ink under the text column to hold contrast, then it gets out of the way so
+   the architecture on the right reads at close to full strength.
+   Measured against the actual asset — see the contrast check in the notes. */
+.hero__scrim {
+  position: absolute; inset: 0; z-index: 1;
+  background:
+    linear-gradient(100deg,
+      rgba(6, 13, 19, 0.86) 0%,
+      rgba(6, 13, 19, 0.66) 34%,
+      rgba(6, 13, 19, 0.22) 68%,
+      rgba(6, 13, 19, 0.34) 100%),
+    linear-gradient(to top,
+      rgba(6, 13, 19, 0.80) 0%,
+      rgba(6, 13, 19, 0.18) 42%,
+      rgba(6, 13, 19, 0) 62%);
+}
+/* Thin architectural line grid — restrained structure, not decoration. */
+.hero__grid {
+  position: absolute; inset: 0; z-index: 2; pointer-events: none;
+  background-image:
+    linear-gradient(to right,  rgba(237,229,216,0.05) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(237,229,216,0.03) 1px, transparent 1px);
+  background-size: 140px 140px;
+  mask-image: linear-gradient(to bottom, rgba(0,0,0,0.85), transparent 78%);
+  -webkit-mask-image: linear-gradient(to bottom, rgba(0,0,0,0.85), transparent 78%);
+}
+.hero__inner { position: relative; z-index: 3; width: 100%; }
+.hero__eyebrow {
+  font-size: 11px; letter-spacing: 0.32em; text-transform: uppercase;
+  color: rgba(237, 229, 216, 0.62); margin: 0 0 26px;
+}
+.hero__title { color: var(--sand); margin-bottom: 30px; }
+.hero__title em {
+  display: block; font-style: italic; color: rgba(237, 229, 216, 0.74);
+}
+.hero__sub {
+  font-size: clamp(18px, 2.1vw, 22px); line-height: 1.55;
+  color: rgba(237, 229, 216, 0.88); max-width: 38ch; margin-bottom: 14px;
+}
+.hero__note { font-size: 15px; color: rgba(237, 229, 216, 0.55); max-width: 42ch; margin-bottom: 40px; }
+.hero__ctas { display: flex; flex-wrap: wrap; gap: 14px; }
+/* Floating glass card, bottom-right — breaks the single-column stack. */
+.hero__card { margin-top: 46px; padding: 26px 28px; }
+.hero__card dl { margin: 0; display: grid; gap: 20px; }
+.hero__card dt {
+  font-family: var(--font-serif); font-size: 21px; color: var(--sand);
+  letter-spacing: 0.01em; margin-bottom: 3px;
+}
+.hero__card dd { margin: 0; font-size: 13px; line-height: 1.5; color: rgba(237, 229, 216, 0.6); }
+.hero__card .rule { height: 1px; background: var(--line-dark); }
+@media (min-width: 820px) {
+  .hero__inner { display: grid; grid-template-columns: 1.25fr 0.75fr; gap: clamp(40px, 6vw, 96px); align-items: end; }
+  .hero__card { margin-top: 0; }
+}
+.scroll-cue {
+  position: absolute; z-index: 3; left: var(--gutter); bottom: 22px;
+  font-size: 9.5px; letter-spacing: 0.26em; text-transform: uppercase;
+  color: rgba(237, 229, 216, 0.34); display: none;
+}
+/* Idle hint so the hero is not frozen before the first scroll. 4px of drift on
+   a 4.6s cycle — under the threshold where it reads as an animation, over the
+   threshold where the page feels dead. ease-in-out rather than --ease: the
+   shared curve is decelerate-only, which visibly stutters when looped. */
+@keyframes cue-drift {
+  0%, 100% { transform: translateY(0);   opacity: 0.7; }
+  50%      { transform: translateY(4px); opacity: 1; }
+}
+.scroll-cue { animation: cue-drift 4.6s ease-in-out infinite; }
+@media (min-width: 820px) and (min-height: 700px) { .scroll-cue { display: block; } }
+
+/* ============================================================================
+   8b. STAT BAR — divided segments directly under the hero.
+   Structural idea taken from the architecture reference; rebuilt entirely in
+   this page's own tokens (navy ground, serif value, stone label) rather than
+   that site's cream-and-gold treatment. Content is real facts only.
+   ========================================================================== */
+.statbar {
+  position: relative; z-index: 2; isolation: isolate;
+  background: linear-gradient(172deg, #16273300 0%, #101E29 0%, #0C1922 100%);
+  border-top: 1px solid var(--line-dark);
+  border-bottom: 1px solid var(--line-dark);
+}
+.statbar::after {
+  content: ""; position: absolute; inset: 0; z-index: 0; pointer-events: none;
+  background-image: var(--noise); opacity: 0.10;
+}
+.statbar__inner { position: relative; z-index: 1; display: grid; grid-template-columns: 1fr 1fr; }
+.statbar__cell {
+  padding: clamp(22px, 3.2vw, 36px) clamp(14px, 2.2vw, 28px);
+  border-left: 1px solid var(--line-dark);
+}
+/* Two-up on small screens: no left rule on the first of each row, and a
+   horizontal rule between the two rows. */
+.statbar__cell:nth-child(odd)  { border-left: 0; }
+.statbar__cell:nth-child(n+3)  { border-top: 1px solid var(--line-dark); }
+.statbar__value {
+  display: block; font-family: var(--font-serif); font-weight: 400;
+  font-size: clamp(18px, 2.3vw, 26px); line-height: 1.15;
+  color: var(--sand); margin-bottom: 7px;
+}
+.statbar__label {
+  font-size: 10.5px; letter-spacing: 0.22em; text-transform: uppercase;
+  color: var(--stone-dim);
+}
+@media (min-width: 860px) {
+  .statbar__inner { grid-template-columns: repeat(4, 1fr); }
+  .statbar__cell:nth-child(odd) { border-left: 1px solid var(--line-dark); }
+  .statbar__cell:first-child    { border-left: 0; }
+  .statbar__cell:nth-child(n+3) { border-top: 0; }
+}
+
+/* ============================================================================
+   9. PROBLEM — a full-bleed SCENE.
+   The clip fills the frame and the type sits directly on it over a scrim, the
+   same technique the hero already uses. Why Oahu deliberately keeps its
+   split grid so the page alternates treatments instead of repeating one.
+   ========================================================================== */
+.problem { --pad: 0; }
+.problem > .wrap { padding-top: clamp(44px, 6vw, 74px); padding-bottom: clamp(78px, 10vw, 132px); }
+
+.scene {
+  position: relative; z-index: 1; isolation: isolate;
+  min-height: min(78vh, 700px);
+  display: flex; align-items: flex-end;
+  padding: clamp(76px, 11vw, 140px) 0 clamp(40px, 5vw, 64px);
+  overflow: hidden; background: var(--ink);
+}
+.problem__slot { position: absolute; inset: 0; z-index: 0; border-radius: 0; box-shadow: none; }
+.problem__slot .slot__frame { inset: clamp(14px, 2.4vw, 30px); }
+.scene__scrim {
+  position: absolute; inset: 0; z-index: 1;
+  background:
+    linear-gradient(102deg, rgba(6, 13, 19, 0.93) 0%, rgba(6, 13, 19, 0.76) 44%, rgba(6, 13, 19, 0.32) 80%, rgba(6, 13, 19, 0.50) 100%),
+    linear-gradient(to top, rgba(6, 13, 19, 0.88) 0%, rgba(6, 13, 19, 0) 54%);
+}
+.scene__inner { position: relative; z-index: 2; width: 100%; color: var(--sand); }
+.scene__label { color: var(--stone-dim); }
+.scene__title { color: var(--sand); }
+.scene__body {
+  margin-top: 20px; max-width: 54ch;
+  font-size: clamp(16px, 1.8vw, 19px); line-height: 1.6;
+  color: rgba(237, 229, 216, 0.82);
+}
+/* The quiet "learn more" the travel reference uses — a link, not a button, so
+   it never competes with the brass CTAs. */
+.scene__more {
+  display: inline-flex; align-items: center; gap: 10px; margin-top: 26px;
+  font-size: 11.5px; letter-spacing: 0.18em; text-transform: uppercase;
+  color: var(--sand); text-decoration: none;
+  padding-bottom: 6px; border-bottom: 1px solid rgba(237, 229, 216, 0.32);
+  transition: border-color 300ms var(--ease), color 300ms var(--ease);
+}
+.scene__more span {
+  width: 18px; height: 1px; background: currentColor; position: relative;
+  transition: transform 300ms var(--ease);
+}
+.scene__more span::after {
+  content: ""; position: absolute; right: 0; top: -3px;
+  width: 7px; height: 7px; border-top: 1px solid currentColor;
+  border-right: 1px solid currentColor; transform: rotate(45deg);
+}
+.scene__more:hover { color: var(--brass-2); border-bottom-color: var(--brass-2); }
+.scene__more:hover span { transform: translateX(5px); }
+
+.stat-card { padding: 20px 24px; max-width: 230px; margin-top: 30px; }
+.stat-card b {
+  display: block; font-family: var(--font-serif); font-weight: 400;
+  font-size: 30px; line-height: 1.1; color: var(--ink); margin-bottom: 6px;
+}
+.stat-card span { font-size: 12.5px; line-height: 1.5; color: var(--stone); }
+/* Floated into the scene only where there is room for it; on narrow screens it
+   simply flows under the copy rather than covering the frame. */
+@media (min-width: 900px) {
+  .stat-card { position: absolute; right: 0; bottom: 0; margin-top: 0; z-index: 3; }
+  .scene__inner { padding-right: 270px; }
+}
+
+/* Three points, side by side on the sand ground below the scene. */
+.problem__list { list-style: none; margin: 0; padding: 0; display: grid; gap: clamp(18px, 2.6vw, 34px); }
+@media (min-width: 820px) { .problem__list { grid-template-columns: repeat(3, 1fr); } }
+.problem__list li { padding: 22px 0 0; border-top: 1px solid var(--line-light); }
+.problem__num {
+  display: block; font-family: var(--font-serif); font-size: 14px;
+  color: var(--stone); letter-spacing: 0.1em; margin-bottom: 12px;
+}
+.problem__list p { font-size: 15.5px; color: var(--stone); }
+.problem__list strong { display: block; color: var(--ink); font-weight: 600; font-size: 16px; margin-bottom: 5px; }
+
+/* ============================================================================
+   10. ABOUT — a major moment: extra height, content offset off the left margin,
+   the paragraph lifted into a large frosted card.
+   ========================================================================== */
+.about { --pad: clamp(108px, 15vw, 216px); }
+.about__inner { display: grid; gap: clamp(28px, 4vw, 52px); }
+@media (min-width: 980px) {
+  /* Offset: nothing starts at the same left margin as the sections around it. */
+  .about__inner { grid-template-columns: 0.34fr 0.66fr; padding-left: 8%; }
+}
+.about__card { padding: clamp(30px, 4.4vw, 58px); }
+.about__quote {
+  font-family: var(--font-serif);
+  font-size: clamp(20px, 2.7vw, 31px); line-height: 1.45; letter-spacing: -0.005em;
+  color: var(--sand);
+}
+.about__sig {
+  font-size: 11px; letter-spacing: 0.2em; text-transform: uppercase;
+  color: var(--stone-dim); margin-top: 30px;
+  padding-top: 22px; border-top: 1px solid var(--line-dark);
+}
+
+/* ============================================================================
+   11. HOW IT WORKS — staggered cards, not a symmetrical grid
+   ========================================================================== */
+.how { --pad: clamp(84px, 11vw, 150px); }
+/* THE PINNED MOMENT — the only one on the page, kept singular on purpose.
+   On desktop the heading column holds in place while both track cards travel up
+   past it, then releases with the section. The tracks stack vertically here
+   rather than sitting side by side: a two-across pair is barely taller than the
+   heading itself, so there would be nothing for the sticky element to hold
+   through. The stack is what buys the hold. */
+.how__layout { display: grid; gap: clamp(30px, 4vw, 54px); }
+@media (min-width: 900px) {
+  /* Heading column kept deliberately narrow: the tracks now carry a horizontal
+     three-step process and need the width more than the headline does. */
+  .how__layout { grid-template-columns: 0.32fr 0.68fr; gap: clamp(34px, 4vw, 66px); align-items: start; }
+  /* 116px clears the 68px nav with breathing room above the label. */
+  .how__pin { position: sticky; top: 116px; }
+}
+.tracks { display: grid; gap: clamp(22px, 3vw, 38px); margin-top: clamp(30px, 4vw, 44px); }
+@media (min-width: 900px) {
+  .tracks { margin-top: 0; }
+  /* Second card stepped right — keeps the editorial asymmetry the old
+     side-by-side vertical stagger used to provide. */
+  .tracks > :nth-child(2) { margin-left: clamp(0px, 3.5vw, 52px); }
+}
+.track { padding: clamp(30px, 3.8vw, 46px); display: flex; flex-direction: column; }
+.track__tag {
+  font-size: 11px; letter-spacing: 0.2em; text-transform: uppercase;
+  color: var(--stone); margin-bottom: 16px;
+}
+.track__price {
+  font-family: var(--font-serif); font-size: 15px; color: var(--stone);
+  padding-bottom: 24px; margin-bottom: 24px; border-bottom: 1px solid var(--line-light);
+}
+/* Horizontal connected process — circular badges joined by a hairline, one row
+   per track. Structural idea from the architecture reference, drawn in this
+   page's own stone/sand tokens rather than its gold. Stacks on narrow screens,
+   where a connected row simply will not fit. */
+.track__steps {
+  list-style: none; margin: 0; padding: 0; flex: 1;
+  position: relative; display: grid; gap: 22px;
+}
+.step { position: relative; z-index: 1; }
+.step__badge {
+  display: flex; align-items: center; justify-content: center;
+  width: 34px; height: 34px; border-radius: 50%;
+  border: 1px solid var(--line-light);
+  /* Opaque so it visibly breaks the connector line running behind it. */
+  background: var(--sand-2);
+  font-family: var(--font-serif); font-size: 12.5px; color: var(--stone);
+  letter-spacing: 0.06em;
+}
+.step__text { font-size: 15px; line-height: 1.55; }
+
+/* 1020px, not a smaller breakpoint: below this the steps sit inside a nested
+   column and three across would leave each one a ~130px ribbon of text. The
+   connected row only earns its place once the columns can actually breathe. */
+@media (min-width: 1020px) {
+  .track__steps { grid-template-columns: repeat(3, 1fr); gap: clamp(14px, 1.6vw, 24px); }
+  /* Runs between the first and last badge centres — with three equal columns
+     those sit at 1/6 and 5/6 of the row. */
+  .track__steps::before {
+    content: ""; position: absolute; z-index: 0;
+    top: 17px; left: 16.666%; right: 16.666%;
+    height: 1px; background: var(--line-light);
+  }
+  .step__badge { margin-bottom: 16px; }
+}
+@media (max-width: 1019px) {
+  .step { display: grid; grid-template-columns: 34px 1fr; gap: 15px; align-items: start; }
+}
+.track__cta { margin-top: 30px; }
+
+/* ============================================================================
+   12. WHY OAHU — a major moment: text left, detail image right, extra height
+   ========================================================================== */
+.why { --pad: clamp(100px, 13.5vw, 196px); }
+.why__grid { display: grid; gap: clamp(34px, 5vw, 70px); align-items: center; }
+@media (min-width: 940px) { .why__grid { grid-template-columns: 1.06fr 0.94fr; } }
+.why__points { display: grid; margin-top: 40px; }
+.why__point { padding: 24px 0; border-bottom: 1px solid var(--line-dark); }
+.why__point:first-child { border-top: 1px solid var(--line-dark); }
+.why__point h3 { font-size: 19px; color: var(--sand); margin-bottom: 7px; }
+.why__point p { font-size: 15px; color: var(--stone-dim); }
+.why__slot { aspect-ratio: 4 / 3; }
+@media (min-width: 940px) { .why__media { transform: translateY(18px); } }
+
+/* Real vendor categories, surfaced before the form. Same array the waitlist
+   select is built from — nothing invented, nothing counted. */
+.why__cats {
+  margin-top: clamp(46px, 6vw, 76px);
+  padding-top: clamp(32px, 4vw, 46px);
+  border-top: 1px solid var(--line-dark);
+}
+.why__cats-note { font-size: 15px; margin: -8px 0 22px; }
+.cats { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 9px; }
+.cat {
+  font-size: 12.5px; letter-spacing: 0.03em;
+  color: rgba(237, 229, 216, 0.80);
+  border: 1px solid var(--line-dark);
+  background: rgba(237, 229, 216, 0.045);
+  padding: 9px 15px; border-radius: 2px;
+  transition: border-color 280ms var(--ease), background 280ms var(--ease), color 280ms var(--ease);
+}
+@media (hover: hover) and (pointer: fine) {
+  .cat:hover {
+    color: var(--sand);
+    border-color: rgba(201, 164, 101, 0.48);
+    background: rgba(201, 164, 101, 0.09);
+  }
+}
+
+/* ============================================================================
+   12b. FEATURED VIDEO PLAYER — the page's one "watch this" moment.
+   Everything else that moves is ambient and autoplaying; this one starts
+   paused behind a play affordance and carries visible transport UI so it
+   reads as something you choose to watch.
+   ========================================================================== */
+.vp__cue {
+  position: absolute; inset: 0; z-index: 5;
+  display: flex; align-items: center; justify-content: center;
+  background: rgba(6, 13, 19, 0.30);
+  border: 0; padding: 0; cursor: pointer;
+  transition: opacity 340ms var(--ease), background 340ms var(--ease);
+}
+.slot--player.is-playing .vp__cue { opacity: 0; pointer-events: none; }
+.vp__cue-mark {
+  position: relative; display: block;
+  width: 64px; height: 64px; border-radius: 50%;
+  border: 1px solid rgba(237, 229, 216, 0.55);
+  background: rgba(11, 22, 32, 0.42);
+  -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px);
+  transition: transform 340ms var(--ease), border-color 340ms var(--ease), background 340ms var(--ease);
+}
+.vp__cue-mark::after {
+  content: ""; position: absolute; top: 50%; left: 50%;
+  transform: translate(-40%, -50%);
+  border-left: 15px solid var(--sand);
+  border-top: 9.5px solid transparent; border-bottom: 9.5px solid transparent;
+}
+.vp__cue:hover .vp__cue-mark {
+  transform: scale(1.06); border-color: var(--brass-2); background: rgba(11, 22, 32, 0.58);
+}
+
+.vp {
+  position: absolute; left: 0; right: 0; bottom: 0; z-index: 6;
+  display: flex; align-items: center; gap: 13px;
+  padding: 30px clamp(14px, 2.2vw, 22px) 13px;
+  background: linear-gradient(to top, rgba(6, 13, 19, 0.88), rgba(6, 13, 19, 0));
+}
+.vp__btn {
+  flex: none; position: relative; width: 32px; height: 32px; padding: 0;
+  border-radius: 50%; cursor: pointer;
+  border: 1px solid rgba(237, 229, 216, 0.30);
+  background: rgba(11, 22, 32, 0.45);
+  transition: border-color 260ms var(--ease), background 260ms var(--ease);
+}
+.vp__btn:hover { border-color: var(--brass-2); background: rgba(11, 22, 32, 0.68); }
+.vp__icon { position: absolute; top: 50%; left: 50%; width: 10px; height: 11px; transform: translate(-50%, -50%); }
+/* Play triangle, swapped for two pause bars once running. */
+.vp__icon::before {
+  content: ""; position: absolute; top: 0; left: 1px;
+  border-left: 9px solid var(--sand);
+  border-top: 5.5px solid transparent; border-bottom: 5.5px solid transparent;
+  transition: opacity 160ms var(--ease);
+}
+.vp__icon::after {
+  content: ""; position: absolute; top: 0; left: 0; width: 10px; height: 11px;
+  border-left: 3px solid var(--sand); border-right: 3px solid var(--sand);
+  opacity: 0; transition: opacity 160ms var(--ease);
+}
+.slot--player.is-playing .vp__icon::before { opacity: 0; }
+.slot--player.is-playing .vp__icon::after  { opacity: 1; }
+
+.vp__track {
+  flex: 1; height: 2px; border-radius: 2px; overflow: hidden;
+  background: rgba(237, 229, 216, 0.20);
+}
+.vp__fill { display: block; height: 100%; width: 0%; background: var(--brass-2); }
+.vp__time {
+  flex: none; font-size: 11px; letter-spacing: 0.07em;
+  color: rgba(237, 229, 216, 0.72);
+  font-variant-numeric: tabular-nums;
+}
+
+/* ============================================================================
+   13. FOUNDER NOTE — a minor moment on purpose: less height, narrow measure,
+   offset right of center. Modest, not a polished bio block.
+   ========================================================================== */
+.founder { --pad: clamp(64px, 8vw, 108px); }
+.founder__inner { max-width: 640px; }
+@media (min-width: 900px) { .founder__inner { position: relative; margin-left: 34%; } }
+
+/* A person arriving alongside their words — quiet, not a hero-sized visual.
+   Mobile: sits in normal flow, first child, centered, modest. Desktop: pulled
+   out of flow into the 34% gutter .founder__inner already reserved and never
+   used. `right: 100%` anchors it to founder__inner's own left edge rather
+   than computing the gutter's width, so it stays correct at any viewport
+   without duplicating the 34% figure here. */
+.founder__photo {
+  display: block; width: 190px; aspect-ratio: 4 / 5;
+  margin: 0 auto 28px; object-fit: cover;
+  border-radius: 3px;
+  border: 1px solid rgba(169, 131, 75, 0.34); /* --brass at low opacity */
+  box-shadow: var(--shadow-card);
+  /* Desaturates the photo's natural greenery just enough that it sits inside
+     the navy/sand/gold palette instead of fighting it — not a heavy filter
+     stack, this is still meant to read as an unretouched photo of a person. */
+  filter: saturate(0.82) sepia(0.07) contrast(1.02);
+}
+@media (min-width: 900px) {
+  .founder__photo {
+    position: absolute; top: 6px; right: 100%; margin: 0 32px 0 0;
+    width: 200px;
+  }
+}
+.founder__note {
+  font-family: var(--font-serif); font-size: clamp(18px, 2vw, 22px);
+  line-height: 1.62; color: var(--ink);
+}
+.founder__note p + p { margin-top: 18px; }
+.founder__sign {
+  display: flex; align-items: center; gap: 14px; margin-top: 30px;
+  font-size: 12px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--stone);
+}
+.founder__sign::before { content: ""; width: 34px; height: 1px; background: var(--stone); opacity: 0.5; }
+
+/* ============================================================================
+   14. WAITLIST — form floats on a light glass card over full-bleed photography
+   ========================================================================== */
+.waitlist { --pad: clamp(96px, 12vw, 172px); overflow: hidden; }
+/* Full-bleed background layer for the waitlist image slot, held at low opacity
+   so the frosted form card floats over photography rather than flat color.
+   (Slot marker lives in the JS component — CSS comments can't nest.) */
+.waitlist__slot { position: absolute; inset: 0; z-index: 0; border-radius: 0; box-shadow: none; opacity: 0.42; }
+.waitlist__slot .slot__frame { display: none; }
+.waitlist__slot .slot__meta { left: auto; right: var(--gutter); top: 20px; bottom: auto; }
+.waitlist__scrim {
+  position: absolute; inset: 0; z-index: 1;
+  background:
+    radial-gradient(70% 60% at 20% 20%, rgba(7, 15, 22, 0.72) 0%, rgba(7, 15, 22, 0.9) 70%),
+    linear-gradient(180deg, rgba(7, 15, 22, 0.9), rgba(7, 15, 22, 0.82));
+}
+.waitlist > .wrap { z-index: 2; }
+.waitlist__head { max-width: 46ch; }
+@media (min-width: 900px) {
+  .waitlist__grid { display: grid; grid-template-columns: 0.78fr 1.22fr; gap: clamp(40px, 6vw, 84px); align-items: center; }
+}
+.waitlist__head .lede { color: rgba(237, 229, 216, 0.72); }
+.form-shell { padding: clamp(26px, 3.6vw, 46px); }
+.tabs { display: flex; gap: 6px; border-bottom: 1px solid var(--line-light); margin-bottom: 32px; }
+.tab {
+  appearance: none; background: none; border: 0; cursor: pointer;
+  font-family: var(--font-sans); font-size: 12px; font-weight: 600;
+  letter-spacing: 0.14em; text-transform: uppercase;
+  color: var(--stone); padding: 14px 18px; margin-bottom: -1px;
+  border-bottom: 2px solid transparent;
+  transition: color 250ms ease, border-color 250ms ease;
+}
+.tab:hover { color: var(--ink); }
+.tab[aria-selected="true"] { color: var(--ink); border-bottom-color: var(--brass); }
+
+.field { margin-bottom: 20px; }
+.field label {
+  display: block; font-size: 11px; font-weight: 600; letter-spacing: 0.16em;
+  text-transform: uppercase; color: var(--stone); margin-bottom: 9px;
+}
+.field input, .field select {
+  width: 100%; font-family: var(--font-sans); font-size: 16px; color: var(--ink);
+  background: rgba(255, 255, 255, 0.72);
+  border: 1px solid var(--line-light); border-radius: 2px; padding: 14px 15px;
+  transition: border-color 220ms ease, background 220ms ease, box-shadow 220ms ease;
+}
+.field input:focus, .field select:focus {
+  background: #fff; border-color: var(--brass);
+  box-shadow: 0 0 0 3px rgba(169, 131, 75, 0.13);
+}
+.field input::placeholder { color: #B2ABA0; }
+.field.has-error input, .field.has-error select { border-color: #9E3B2E; }
+.field__error { display: none; font-size: 13px; color: #9E3B2E; margin-top: 7px; }
+.field.has-error .field__error { display: block; }
+.form__fine { font-size: 13px; color: var(--stone); margin-top: 18px; line-height: 1.55; }
+
+.confirm { display: none; padding: 8px 0 4px; }
+.confirm.is-visible { display: block; }
+.confirm__mark {
+  width: 46px; height: 46px; border-radius: 50%;
+  border: 1px solid var(--brass); color: var(--brass);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 20px; margin-bottom: 22px;
+}
+.confirm h3 { font-size: 26px; margin-bottom: 12px; }
+.confirm p { color: var(--stone); font-size: 16px; max-width: 46ch; }
+.confirm__again {
+  appearance: none; background: none; border: 0; padding: 0; margin-top: 22px;
+  font-family: var(--font-sans); font-size: 13px; letter-spacing: 0.06em;
+  color: var(--brass); text-decoration: underline; text-underline-offset: 4px; cursor: pointer;
+}
+.pane[hidden] { display: none; }
+/* Tab crossfade. Deliberately quick — this is a utility switch, not a moment.
+   Out is faster than in (150 vs 200ms) so the incoming pane never appears to
+   wait on the outgoing one. */
+.pane {
+  transition: opacity var(--t-quick) var(--ease), transform var(--t-quick) var(--ease);
+}
+.pane.is-swapping-out { opacity: 0; transform: translateY(-6px); transition-duration: 150ms; }
+.pane.is-swapping-in  { opacity: 0; transform: translateY(8px);  transition-duration: 0ms; }
+
+/* Confirmation entrance — the one place on the page where a small reward is
+   warranted. The check, heading and body rise in sequence. `is-revealed` is
+   added a frame after `is-visible` (see initForms): a transition cannot run on
+   an element in the same frame it leaves display:none. */
+.confirm__mark, .confirm h3, .confirm p, .confirm__again {
+  opacity: 0; transform: translateY(9px);
+  transition: opacity var(--t-base) var(--ease), transform var(--t-base) var(--ease);
+}
+.confirm.is-revealed .confirm__mark,
+.confirm.is-revealed h3,
+.confirm.is-revealed p,
+.confirm.is-revealed .confirm__again { opacity: 1; transform: none; }
+.confirm.is-revealed .confirm__mark  { transition-delay:  40ms; }
+.confirm.is-revealed h3              { transition-delay: 110ms; }
+.confirm.is-revealed p               { transition-delay: 180ms; }
+.confirm.is-revealed .confirm__again { transition-delay: 250ms; }
+/* Web3Forms honeypot — visually hidden via CSS (not the hidden attribute) so
+   autofill can't skip past it the way it can skip a hidden-attribute field. */
+.botcheck-field { display: none; }
+
+/* ============================================================================
+   15. FOOTER
+   ========================================================================== */
+.footer {
+  position: relative; background: #070E14; color: var(--sand);
+  padding: clamp(56px, 8vw, 88px) 0 44px;
+}
+.footer::after {
+  content: ""; position: absolute; inset: 0; pointer-events: none;
+  background-image: var(--noise); opacity: 0.10;
+}
+.footer > .wrap { position: relative; z-index: 1; }
+/* Closing CTA above the contact details, so the last thing on the page is an
+   action rather than an address. */
+.footer__cta {
+  display: grid; gap: 26px; align-items: center;
+  padding-bottom: clamp(36px, 4.6vw, 54px);
+  margin-bottom: clamp(32px, 4vw, 44px);
+  border-bottom: 1px solid var(--line-dark);
+}
+@media (min-width: 800px) { .footer__cta { grid-template-columns: 1fr auto; gap: 44px; } }
+.footer__cta-title { color: var(--sand); margin-bottom: 10px; }
+.footer__cta-body { color: var(--stone-dim); font-size: 15.5px; }
+
+.footer__top { display: grid; gap: 30px; padding-bottom: 38px; border-bottom: 1px solid var(--line-dark); }
+@media (min-width: 800px) { .footer__top { grid-template-columns: 1.25fr 1fr; align-items: end; } }
+.footer__name { font-family: var(--font-serif); font-size: 30px; margin-bottom: 12px; color: var(--sand); }
+.footer__desc { color: var(--stone-dim); font-size: 15.5px; max-width: 44ch; }
+/* Two real columns. No social row — there are no accounts to link to. */
+.footer__cols { display: grid; gap: 24px; }
+@media (min-width: 520px) { .footer__cols { grid-template-columns: 1fr 1fr; } }
+.footer__col .label { margin-bottom: 10px; }
+.footer__col a {
+  color: var(--sand); text-decoration: none;
+  border-bottom: 1px solid var(--brass); padding-bottom: 2px;
+}
+.footer__col a:hover { color: var(--brass-2); }
+.footer__plain { color: var(--stone-dim); font-size: 15.5px; }
+.footer__bottom {
+  padding-top: 24px; display: flex; flex-wrap: wrap; gap: 12px 26px;
+  justify-content: space-between; font-size: 12.5px; color: var(--stone-dim);
+}
+
+/* ============================================================================
+   16. CROSS-DISSOLVE
+   Two observers. The IN observer fades a section up as it arrives. The OUT
+   observer fades the previous section down while it is STILL on screen, so the
+   two overlap — a genuine dissolve rather than a hard cut. ~520ms.
+   ========================================================================== */
+.js .reveal {
+  opacity: 0; transform: translateY(22px); filter: blur(6px);
+  transition: opacity var(--t-slow) var(--ease),
+              transform var(--t-slow) var(--ease),
+              filter var(--t-slow) var(--ease);
+  will-change: opacity, transform;
+}
+.js .reveal.is-in { opacity: 1; transform: none; filter: blur(0); }
+/* Outgoing section, still partly visible, dissolving under the incoming one. */
+.js .reveal.is-in.is-out { opacity: 0.22; transform: translateY(-14px); }
+
+/* Per-element cascade. Each piece inside a section carries its own entrance and
+   fires ~80ms behind the one before it, so a section arrives as a sequence
+   rather than a single block. Delays hang off `.is-in` only — the outgoing
+   dissolve must not be staggered. */
+.js .reveal [data-delay] {
+  opacity: 0; transform: translateY(16px); filter: blur(4px);
+  transition: opacity 560ms var(--ease),
+              transform 560ms var(--ease),
+              filter 560ms var(--ease);
+}
+.js .reveal.is-in [data-delay] { opacity: 1; transform: none; filter: blur(0); }
+.js .reveal.is-in [data-delay="1"] { transition-delay:  80ms; }
+.js .reveal.is-in [data-delay="2"] { transition-delay: 160ms; }
+.js .reveal.is-in [data-delay="3"] { transition-delay: 240ms; }
+.js .reveal.is-in [data-delay="4"] { transition-delay: 320ms; }
+
+/* List-item cascade — one level finer than the block cascade above. Only the
+   three genuinely enumerable lists on the page get this; body copy and static
+   labels stay still on purpose. No blur here: these are small elements and the
+   extra raster cost is not worth it for 9px of travel.
+   Delays start at 380ms so the items begin arriving while their parent block is
+   still resolving — overlapping reads as continuous, sequential reads as slow. */
+.js .reveal .problem__list li,
+.js .reveal .why__point,
+.js .reveal .track__steps li {
+  opacity: 0; transform: translateY(9px);
+  transition: opacity var(--t-base) var(--ease),
+              transform var(--t-base) var(--ease);
+}
+.js .reveal.is-in .problem__list li,
+.js .reveal.is-in .why__point,
+.js .reveal.is-in .track__steps li { opacity: 1; transform: none; }
+
+.js .reveal.is-in .problem__list li:nth-child(1),
+.js .reveal.is-in .why__point:nth-child(1),
+.js .reveal.is-in .track__steps li:nth-child(1) { transition-delay: 380ms; }
+.js .reveal.is-in .problem__list li:nth-child(2),
+.js .reveal.is-in .why__point:nth-child(2),
+.js .reveal.is-in .track__steps li:nth-child(2) { transition-delay: 450ms; }
+.js .reveal.is-in .problem__list li:nth-child(3),
+.js .reveal.is-in .why__point:nth-child(3),
+.js .reveal.is-in .track__steps li:nth-child(3) { transition-delay: 520ms; }
+.js .reveal.is-in .problem__list li:nth-child(4),
+.js .reveal.is-in .why__point:nth-child(4),
+.js .reveal.is-in .track__steps li:nth-child(4) { transition-delay: 590ms; }
+.js .reveal.is-in .problem__list li:nth-child(n+5),
+.js .reveal.is-in .why__point:nth-child(n+5),
+.js .reveal.is-in .track__steps li:nth-child(n+5) { transition-delay: 660ms; }
+
+/* ---------------------------------------------------------------------------
+   HERO ENTRANCE — deliberately unlike the rest of the page.
+   Everywhere else a section arrives in ~560ms on an 80ms ladder. The hero is
+   the one moment worth slowing down for, so it runs its own longer sequence:
+   the backdrop settles first (JS, see initParallax), then the headline
+   resolves out of a real blur, then the supporting copy follows it in.
+   These rules carry `.hero` in the selector, which outranks the generic
+   `.reveal.is-in [data-delay]` ladder above without needing !important.
+   ------------------------------------------------------------------------- */
+
+/* The headline carries no data-delay, so it needs its own hidden state.
+   14px of blur and 34px of travel over 1250ms — roughly double the page's
+   standard entrance, which is what makes it read as considered rather than
+   just late. */
+.js .hero.reveal .hero__title {
+  opacity: 0; transform: translateY(34px); filter: blur(14px);
+  transition: opacity 1250ms var(--ease),
+              transform 1250ms var(--ease),
+              filter 1250ms var(--ease);
+  transition-delay: 420ms;
+  will-change: transform, filter, opacity;
+}
+.js .hero.reveal.is-in .hero__title { opacity: 1; transform: none; filter: blur(0); }
+
+/* Supporting copy waits for the headline to be most of the way resolved
+   before it starts, so the hero reads as backdrop -> headline -> everything
+   else rather than as one simultaneous block. */
+.js .hero.reveal.is-in [data-delay="1"] { transition-delay: 240ms; }
+.js .hero.reveal.is-in [data-delay="3"] { transition-delay: 1080ms; }
+.js .hero.reveal.is-in [data-delay="4"] { transition-delay: 1240ms; }
+/* The cue is last in and fades rather than travels — it is an instruction,
+   not part of the composition. */
+.js .hero.reveal .scroll-cue { opacity: 0; transition: opacity 700ms var(--ease); }
+.js .hero.reveal.is-in .scroll-cue { opacity: 1; transition-delay: 1560ms; }
+
+/* ---------------------------------------------------------------------------
+   FOUNDER PHOTO ENTRANCE — a person arriving, then their words.
+   Scale-settle rather than blur: this is a "minor moment" section by design
+   (see the FOUNDER NOTE header comment), so it borrows the slot__media
+   parallax's quiet 1.04 -> 1.0 settle rather than the hero's heavier blur
+   treatment — enough to feel considered without competing with the hero for
+   weight. No data-delay attribute, so — same as .hero__title — it needs its
+   own hidden state; transition-delay 0 puts it essentially alongside the
+   label's 80ms, arriving a beat first rather than simultaneously.
+   ------------------------------------------------------------------------- */
+.js .founder.reveal .founder__photo {
+  opacity: 0; transform: scale(1.04);
+  transition: opacity 640ms var(--ease), transform 640ms var(--ease);
+  transition-delay: 0ms;
+  will-change: transform, opacity;
+}
+.js .founder.reveal.is-in .founder__photo { opacity: 1; transform: none; }
+
+/* Phones rasterize a blurred full-width section at real cost, so the entrance
+   blur is lighter there. It is the one property in this file that is not free.
+   Must come after the rules above — same specificity, so source order decides. */
+@media (max-width: 700px) {
+  .js .reveal { filter: blur(3.5px); }
+  .js .reveal [data-delay] { filter: blur(2.5px); }
+  .js .reveal.is-in, .js .reveal.is-in [data-delay] { filter: blur(0); }
+  /* The hero headline's 14px blur is the single most expensive raster on the
+     page. On a phone it spans most of the viewport width, so it comes down to
+     7px — still clearly a focus-pull, at roughly a quarter of the fill cost. */
+  .js .hero.reveal .hero__title { filter: blur(7px); }
+  .js .hero.reveal.is-in .hero__title { filter: blur(0); }
+}
+
+/* Once the entrance is done the filter is dropped entirely (see initReveal).
+   A lingering blur(0) is still a filter: it keeps the section on its own raster
+   layer for the rest of the page's life, which is exactly the cost we do not
+   want to carry on a phone while scrolling. */
+.js .reveal.is-clear,
+.js .reveal.is-clear [data-delay],
+/* The headline sits outside the [data-delay] group, so it needs naming here
+   explicitly or it would hold a blur(0) raster layer for the life of the page
+   — the exact cost this cleanup exists to avoid. */
+.js .reveal.is-clear .hero__title { filter: none; will-change: auto; }
+/* The founder photo has no filter to drop, but it does carry its own
+   will-change outside the [data-delay] group above — same cleanup, different
+   property. */
+.js .reveal.is-clear .founder__photo { will-change: auto; }
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  .js .reveal,
+  .js .reveal [data-delay],
+  /* Named separately for the same reason as in the is-clear rule: the hero
+     headline and cue are outside the [data-delay] group and would otherwise
+     stay at opacity 0 forever, blanking the hero for exactly the users this
+     block exists to protect. */
+  .js .hero.reveal .hero__title,
+  .js .hero.reveal .scroll-cue {
+    opacity: 1 !important; transform: none !important;
+    filter: none !important; transition: none !important;
+  }
+  /* Not folded into the rule above: that one also zeroes `filter`, and the
+     founder photo's filter is the permanent saturate/sepia colour grade
+     (Part 2), not an entrance effect — clearing it here would strip that
+     treatment for exactly the users this block is meant to protect, not
+     touch. Only the animated properties get forced. */
+  .js .founder.reveal .founder__photo {
+    opacity: 1 !important; transform: none !important; transition: none !important;
+  }
+  .js .reveal.is-out { opacity: 1 !important; }
+  .tracks > :nth-child(2) { transform: none !important; }
+  /* No pinning and no cursor glow either — both are motion. */
+  .how__pin { position: static !important; }
+  .glass::after, .glass-light::after { content: none !important; }
+  .track:hover { transform: none !important; }
+
+  /* Everything added for the extended coverage pass. The catch-all at the
+     bottom of this block zeroes durations, but it does NOT reset the resting
+     states these effects animate *from* — an element left at opacity 0 would
+     simply never be seen. Each one is reset to its final state explicitly. */
+  .js .reveal .problem__list li,
+  .js .reveal .why__point,
+  .js .reveal .track__steps li,
+  .confirm__mark, .confirm h3, .confirm p, .confirm__again,
+  .pane, .pane.is-swapping-out, .pane.is-swapping-in {
+    opacity: 1 !important; transform: none !important; transition: none !important;
+  }
+  /* An infinite animation clamped to 0.001ms is still an infinite animation. */
+  .scroll-cue { animation: none !important; opacity: 1 !important; }
+  /* Underline still appears on hover — it is an affordance, not motion — but
+     it arrives instantly rather than drawing. */
+  .nav__links a::after { transition: none !important; }
+  .btn--brass::after { display: none !important; }
+
+  /* Structural pass additions. The featured player itself still works — an
+     explicit click to play is a user choice, not imposed motion — but nothing
+     around it slides or scales. */
+  .scene__more:hover span { transform: none !important; }
+  .vp__cue:hover .vp__cue-mark { transform: none !important; }
+  .vp__cue, .vp__cue-mark, .vp__btn, .vp__icon::before, .vp__icon::after, .cat {
+    transition: none !important;
+  }
+  /* No parallax, no scale-settle, no drift headroom — the visual sits still.
+     Video src is never attached either (see initMedia), so what shows is the
+     static poster image. */
+  .slot__media {
+    top: 0 !important; height: 100% !important;
+    transform: none !important; opacity: 1 !important; will-change: auto !important;
+  }
+  * { animation-duration: 0.001ms !important; transition-duration: 0.001ms !important; }
+}
+</style>
+</head>
+
+<body>
+<a class="skip-link" href="#main">Skip to content</a>
+
+<div id="nav-root"></div>
+<main id="main"></main>
+<div id="footer-root"></div>
+
+<script>
+(function () {
+  "use strict";
+
+  /* ==========================================================================
+     CONFIG — the one place to wire in real assets.
+     Every slot below renders a composed placeholder until you set a filename.
+     Drop files next to this HTML and fill in the strings.
+     ====================================================================== */
+  var CONFIG = {
+    contactEmail: "kennethcabote4515@gmail.com",
+    web3formsKey: "c933452e-7ae7-459d-a12a-7fc82dfdc699",
+
+    /* Posters. For problem / why-hawaii / waitlist these are frames pulled at
+       0.6s from the matching clip, so the still the page paints first is one
+       the video itself lands on and the handoff is invisible.
+
+       hero-oahu-home is different: it is a separately composed 2K still
+       (Higgsfield job 8e4a4cbf), not a frame grab. That same still was then
+       used as the start frame for the clip, so it still matches frame 0
+       exactly — but it stands on its own as a finished image, which is what
+       the reduced-motion and pre-load states actually show. */
+    images: {
+      "hero-oahu-home":      "assets/hero-oahu-home.jpg",
+      "problem-visual":      "assets/problem-visual.jpg",
+      "why-hawaii-detail":   "assets/why-hawaii-detail.jpg",
+      "waitlist-background": "assets/waitlist-background.jpg",
+      // A real photo of the founder, not a composed scene, so it is kept out
+      // of the CONFIG.videos / ImageSlot / pickArt machinery built for those —
+      // FounderNote() reads it directly.
+      "founder-headshot":    "assets/founder-headshot.jpg"
+    },
+    /* Higgsfield-generated looping clips, 24fps, 4-6s, h264 yuv420p, audio
+       stripped (they are decorative and always muted) and written with
+       +faststart so playback can begin before the file finishes downloading.
+       A slot with a clip here renders <video> using its still as the poster;
+       clear the string and that slot falls back to the static image. */
+    videos: {
+      "hero-oahu-home":      "assets/hero-oahu-home.mp4",
+      "problem-visual":      "assets/problem-visual.mp4",
+      "why-hawaii-detail":   "assets/why-hawaii-detail.mp4",
+      "waitlist-background": "assets/waitlist-background.mp4"
+    },
+
+    /* Portrait art direction — hero only.
+       A 16:9 frame in a 100svh hero on a 393x851 phone loses 78% of its width
+       to object-fit: cover, which left the architecture as an unreadable
+       vertical sliver. These are separately composed 9:16 generations of the
+       same scene and palette (still: Higgsfield job 44848620; clip generated
+       from that same still), not a re-crop of the landscape asset — a crop
+       cannot invent the sky and foreground a tall frame needs.
+       Applied by pickArt() below; every other slot ignores this map. */
+    portrait: {
+      media: "(max-aspect-ratio: 3/4)",
+      images: { "hero-oahu-home": "assets/hero-oahu-home-portrait.jpg" },
+      videos: { "hero-oahu-home": "assets/hero-oahu-home-portrait.mp4" }
+    }
+  };
+
+  /* Resolves a slot key to the right art for this viewport. Evaluated once at
+     render time, before first paint, so the poster in the markup is already
+     the correct one — swapping it afterwards would cause the exact flash the
+     poster exists to prevent. */
+  function pickArt(kind, key) {
+    var p = CONFIG.portrait;
+    if (p && p[kind] && p[kind][key] &&
+        window.matchMedia && window.matchMedia(p.media).matches) {
+      return p[kind][key];
+    }
+    return CONFIG[kind][key];
+  }
+
+  /* ==========================================================================
+     CONTENT — every word on the page lives here.
+     ====================================================================== */
+  var CONTENT = {
+    brand: { name: "Valley Network", tag: "Oahu, Hawaii" },
+
+    nav: [
+      { label: "The Problem",  href: "#problem" },
+      { label: "About",        href: "#about" },
+      { label: "How It Works", href: "#how" },
+      { label: "Why Oahu",     href: "#why" }
+    ],
+
+    hero: {
+      eyebrow: "Oahu · Hawaii",
+      title: "Valley",
+      titleAccent: "Network",
+      // Core one-liner — provided copy, verbatim.
+      sub: "Valley Network is a trusted vendor directory that helps Oahu contractors and photographers get warm referrals from real estate agents.",
+      note: "Free for agents. Vendors apply to be listed.",
+      ctaAgent: "I'm an Agent",
+      ctaVendor: "I'm a Vendor",
+      facts: [
+        { big: "Oahu only",   small: "One island, covered properly — not fifty states covered badly." },
+        { big: "Free for agents", small: "No seat fee, no card, no per-referral cut." },
+        { big: "Vouched",     small: "Every vendor backed by an agent who actually hired them." }
+      ]
+    },
+
+    /* Stat bar under the hero.
+       HONESTY NOTE: every `value` here is a real, already-established fact —
+       the first three are `hero.facts[].big` verbatim, the fourth is the
+       brand's location. There are deliberately NO numbers ("15+ years",
+       "98% satisfaction", vendor counts). This is a pre-launch business with
+       nothing to count yet, and a fabricated figure would be trivially
+       falsifiable. The `label`s are category descriptors, not claims. */
+    statBar: [
+      { value: "Oahu only",       label: "Coverage" },
+      { value: "Free for agents", label: "Pricing" },
+      { value: "Vouched",         label: "Every vendor" },
+      { value: "Oahu, Hawaii",    label: "Based in" }
+    ],
+
+    problem: {
+      label: "The Problem",
+      title: "Finding a good vendor shouldn't take three days and a Facebook post.",
+      statement: "When an agent needs a photographer by Thursday or a termite inspection before closing, they either already know someone or they post in a Facebook group and hope a useful answer comes back. Nothing is built for Hawaii — the closest options are national platforms that have never worked a deal here.",
+      stat: { big: "3 groups", small: "The average agent asks in three places before getting one name they trust." },
+      list: [
+        { t: "The search is scattered", d: "Names live in group threads, old texts, and whoever happens to be online that afternoon." },
+        { t: "The trust is guesswork",  d: "A name in a comment isn't a vouch. You still don't know who showed up on time." },
+        { t: "Vendors get cold leads",  d: "Good local crews pay for ads that reach strangers instead of the agents who'd hire them twice." }
+      ]
+    },
+
+    about: {
+      label: "About",
+      heading: "One place, built for here.",
+      // Provided About paragraph — used exactly, unedited.
+      paragraph: "We help solo real estate agents in Hawaii who don't have a big brokerage team behind them market their listings or find people they can trust. Right now they piece it together from scattered Facebook groups or figure it out alone. Valley Network gives them one place built just for Hawaii agents, with real templates, a list of vendors other local agents actually trust, and one place to talk to Hawaii agents instead of scrolling through a feed for something useful.",
+      sig: "Valley Network — Oahu, Hawaii"
+    },
+
+    how: {
+      label: "How It Works",
+      title: "Two sides. One list worth trusting.",
+      intro: "Agents keep the list honest. Vendors earn their place on it.",
+      agent: {
+        tag: "For Agents",
+        headline: "Search vendors other agents trust — free",
+        price: "Free, always. No card, no seat fee.",
+        steps: [
+          "Search by what you need and where — photographer in Kailua, inspector in Ewa Beach, painter who'll actually drive to Waianae.",
+          "See who other Oahu agents have worked with, and what they said afterward.",
+          "Reach out directly. Leave a note after the job so the next agent knows too."
+        ],
+        cta: "Join the agent waitlist"
+      },
+      vendor: {
+        tag: "For Vendors",
+        headline: "Get listed, get warm referrals — no cold leads",
+        price: "Paid listing. Applications reviewed one at a time.",
+        steps: [
+          "Apply with your business, your category, and the parts of the island you actually cover.",
+          "We check your work with agents who've hired you before you go on the list.",
+          "Agents find you when they already need you — and they arrive knowing you're vouched for."
+        ],
+        cta: "Apply to be listed"
+      }
+    },
+
+    why: {
+      label: "Why Oahu Only",
+      title: "A national directory doesn't know who's good in Kaneohe.",
+      body: "Hawaii runs on who you know. A platform covering every zip code on the mainland can't tell you which inspector works around a tight closing window here, which stager knows how a listing photographs in this light, or who won't quote you double for a job past the H-1 merge.",
+      points: [
+        { t: "It knows leasehold from fee simple", d: "Vendors here already understand the questions a mainland platform would have to explain." },
+        { t: "It knows the island runs on schedule risk", d: "Materials come by barge and traffic decides your afternoon. Local vendors price and plan around that." },
+        { t: "Small list, high bar", d: "Thirty vendors agents keep going back to beats three hundred nobody will vouch for." }
+      ],
+      /* Surfaces the real vendor categories (see waitlist.vendor.categories)
+         before anyone opens the form. Descriptive framing only — it says what
+         the list covers, it does not claim how many vendors are on it. */
+      categoriesLabel: "Categories",
+      categoriesNote: "The kinds of vendors the directory covers on Oahu."
+    },
+
+    founder: {
+      label: "Who's Building This",
+      note: [
+        "I'm Kenneth Cabote, 16, an incoming junior at Moanalua High School. I run Valley 1, a real estate video and marketing business on Oahu — I shoot listings, and I've been working on turning that into faster, short-form content for agents.",
+        "While researching how to grow Valley 1, I kept running into the same problem from a different angle every time: agents don't have one trusted place to find vendors. They ask around, they get lucky or they don't, and nobody's built anything for Hawaii specifically.",
+        "So I started building Valley Network alongside Lane Willis, as part of an entrepreneurship bootcamp at HPU in Honolulu. It's Oahu only on purpose — this is where Valley 1 already works, so it's the one place I can actually stand behind who's on the list, instead of vouching for vendors I've never worked near."
+      ],
+      sign: "Kenneth Cabote · Founder & CEO, Oahu",
+      photoAlt: "Kenneth Cabote, founder of Valley Network"
+    },
+
+    waitlist: {
+      label: "Waitlist",
+      title: "Get on the list.",
+      body: "The directory isn't live yet. Tell us where you fit and we'll reach out when it opens on Oahu — no spam, no drip campaign.",
+      agent: {
+        tabLabel: "I'm an Agent",
+        headline: "Join as an agent",
+        sub: "Free access when we open. We'll ask which vendors you already trust.",
+        submit: "Join the waitlist",
+        fine: "We'll only email you about Valley Network. Unsubscribe any time.",
+        confirmTitle: "You're on the list.",
+        confirmBody: "Thanks — we'll email you when the Oahu directory opens. If you already have someone you swear by, reply to that email and tell us who."
+      },
+      vendor: {
+        tabLabel: "I'm a Vendor",
+        headline: "Apply to be listed",
+        sub: "Early applicants get first review and the first spots in their category.",
+        submit: "Apply to be listed",
+        fine: "Applying doesn't charge you anything. We'll go over pricing before anything is listed.",
+        confirmTitle: "Application received.",
+        confirmBody: "Thanks — we'll be in touch to talk through your work, the areas you cover, and what a listing looks like before anything goes live.",
+        categories: [
+          "Photographer / Videographer", "Home Stager", "Home Inspector",
+          "Termite / Pest Inspection", "General Contractor", "Handyman / Repairs",
+          "Landscaping / Yard", "Cleaning Service", "Painter", "Roofer",
+          "Solar / PV", "Moving Company", "Escrow / Title", "Other"
+        ]
+      }
+    },
+
+    footer: {
+      desc: "A trusted vendor directory for Oahu real estate agents. Free for agents, warm referrals for local vendors.",
+      contactLabel: "Get in touch",
+      /* Closing CTA. No social links, no office list, no partner logos — this
+         business has one email and one island, so the footer says exactly that. */
+      ctaTitle: "Get on the list before it opens.",
+      ctaBody: "Free for agents. Vendors apply to be listed.",
+      ctaButton: "Join the waitlist",
+      emailLabel: "Email",
+      locationLabel: "Where",
+      location: "Oahu, Hawaii"
+    }
+  };
+
+  /* ========================================================================== */
+  function esc(s) {
+    return String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+  }
+  function $(sel, root) { return (root || document).querySelector(sel); }
+  function $$(sel, root) { return Array.prototype.slice.call((root || document).querySelectorAll(sel)); }
+
+  /* ==========================================================================
+     ImageSlot — renders a composed placeholder, or the real asset once a
+     filename is set in CONFIG. Aspect ratio and position are already correct,
+     so dropping the image in changes nothing about the layout.
+     ====================================================================== */
+  function ImageSlot(name, opts) {
+    opts = opts || {};
+    var img = pickArt("images", name) || "";
+    var vid = (CONFIG.videos ? pickArt("videos", name) : "") || "";
+    var cls = ["slot"];
+    if (opts.tone === "light") cls.push("slot--light");
+    if (opts.className) cls.push(opts.className);
+    if (img || vid) cls.push("is-filled");
+
+    /* Video slots render the still as the poster so the frame is filled the
+       instant the page paints — no flash of empty space. The clip itself is
+       NOT in the src: initMedia() attaches it only when the slot nears the
+       viewport, and never at all under prefers-reduced-motion, in which case
+       the poster simply stays put as a static image.
+       muted + playsinline are required for mobile autoplay; none have sound. */
+    var media = "";
+    var label = opts.alt
+      ? ' role="img" aria-label="' + esc(opts.alt) + '"'
+      : ' aria-hidden="true"';
+
+    /* opts.player turns a slot into the page's one FEATURED video: it does not
+       autoplay, it is not driven by initMedia, and it carries its own controls.
+       Starting paused behind a play button is what makes it read as "watch
+       this" rather than as another ambient loop. */
+    if (vid && opts.player) {
+      cls.push("slot--player");
+      media = '<video class="slot__media" muted loop playsinline preload="none"' +
+              (img ? ' poster="' + esc(img) + '"' : '') +
+              ' data-src="' + esc(vid) + '" data-player="1"' + label + '></video>';
+    } else if (vid) {
+      media = '<video class="slot__media" autoplay muted loop playsinline preload="none"' +
+              (img ? ' poster="' + esc(img) + '"' : '') +
+              ' data-src="' + esc(vid) + '"' +
+              (opts.eager ? ' data-eager="1"' : '') + label + '></video>';
+    } else if (img) {
+      media = '<img class="slot__media" src="' + esc(img) + '" alt="' + esc(opts.alt || "") + '"' +
+              (opts.eager ? '' : ' loading="lazy"') + ' />';
+    }
+
+    var controls = "";
+    if (vid && opts.player) {
+      controls = '' +
+        '<button class="vp__cue" type="button" data-vp-toggle aria-label="Play video">' +
+          '<span class="vp__cue-mark" aria-hidden="true"></span>' +
+        '</button>' +
+        '<div class="vp">' +
+          '<button class="vp__btn" type="button" data-vp-toggle aria-label="Play video">' +
+            '<span class="vp__icon" data-vp-icon aria-hidden="true"></span>' +
+          '</button>' +
+          // Non-interactive on purpose: the brief calls for a subtle progress
+          // indicator, and a real scrubber would need slider semantics and
+          // keyboard handling for a four-second clip.
+          '<div class="vp__track" role="progressbar" aria-label="Video progress"' +
+            ' aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" data-vp-track>' +
+            '<span class="vp__fill" data-vp-fill></span>' +
+          '</div>' +
+          '<span class="vp__time" data-vp-time>0:00 / 0:00</span>' +
+        '</div>';
+    }
+
+    return '' +
+      '<figure class="' + cls.join(" ") + '" data-slot="' + esc(name) + '"' +
+        (opts.style ? ' style="' + opts.style + '"' : '') + '>' +
+        media +
+        '<div class="slot__frame"></div>' +
+        controls +
+        '<figcaption class="slot__meta"><b>Image slot</b>' + esc(name) +
+          (opts.hint ? '<br>' + esc(opts.hint) : '') + '</figcaption>' +
+      '</figure>';
+  }
+
+  /* ==========================================================================
+     COMPONENTS
+     ====================================================================== */
+
+  function Nav() {
+    var links = CONTENT.nav.map(function (l) {
+      return '<a href="' + esc(l.href) + '">' + esc(l.label) + '</a>';
+    }).join("");
+    // Sticky for the whole scroll, so the waitlist CTA is always one tap away.
+    return '' +
+      '<header class="nav" id="nav">' +
+        '<div class="nav__inner">' +
+          '<a class="wordmark" href="#top">' + esc(CONTENT.brand.name) +
+            '<small>' + esc(CONTENT.brand.tag) + '</small></a>' +
+          '<nav class="nav__links" aria-label="Sections">' + links + '</nav>' +
+          '<div class="nav__actions">' +
+            // Secondary action. Anchors to #waitlist so it inherits the same
+            // smooth scroll every other in-page link uses — no mailto, no new page.
+            '<a class="btn btn--ghost btn--sm nav__secondary" href="#waitlist">Get in Touch</a>' +
+            '<a class="btn btn--brass btn--sm" href="#waitlist">Join the waitlist</a>' +
+          '</div>' +
+        '</div>' +
+      '</header>';
+  }
+
+  function Hero() {
+    var facts = CONTENT.hero.facts.map(function (f, i) {
+      return (i ? '<div class="rule"></div>' : '') +
+        '<div><dt>' + esc(f.big) + '</dt><dd>' + esc(f.small) + '</dd></div>';
+    }).join("");
+
+    // {/* IMAGE SLOT: hero-oahu-home */}
+    // Full-bleed backdrop. Moody editorial architecture, Oahu home at golden
+    // hour. A short looping video can go here instead — set CONFIG.videos.
+    var heroSlot = ImageSlot("hero-oahu-home", {
+      className: "hero__slot",
+      hint: "Oahu home · golden hour · full bleed",
+      alt: "A modern Oahu home at golden hour",
+      eager: true   // above the fold — this one loads immediately, the rest wait
+    });
+
+    return '' +
+      '<section class="hero reveal" id="top">' +
+        heroSlot +
+        '<div class="hero__scrim"></div>' +
+        '<div class="hero__grid"></div>' +
+        '<div class="wrap hero__inner">' +
+          '<div>' +
+            '<p class="hero__eyebrow" data-delay="1">' + esc(CONTENT.hero.eyebrow) + '</p>' +
+            // No data-delay on the h1 on purpose: the headline opts out of the
+            // shared cascade entirely and runs its own slower blur-to-focus
+            // (see .hero__title in the reveal CSS). Adding data-delay back
+            // would re-enter it into the 560ms group treatment.
+            '<h1 class="h-display hero__title">' + esc(CONTENT.hero.title) +
+              '<em>' + esc(CONTENT.hero.titleAccent) + '</em></h1>' +
+            '<p class="hero__sub" data-delay="3">' + esc(CONTENT.hero.sub) + '</p>' +
+            '<p class="hero__note" data-delay="3">' + esc(CONTENT.hero.note) + '</p>' +
+            '<div class="hero__ctas" data-delay="4">' +
+              '<a class="btn btn--brass" href="#waitlist" data-open-tab="agent">' + esc(CONTENT.hero.ctaAgent) + '</a>' +
+              '<a class="btn btn--outline-light" href="#waitlist" data-open-tab="vendor">' + esc(CONTENT.hero.ctaVendor) + '</a>' +
+            '</div>' +
+          '</div>' +
+        '</div>' +
+        '<span class="scroll-cue">Scroll</span>' +
+      '</section>';
+  }
+
+  /* Horizontal fact bar, directly under the hero. Structure borrowed from the
+     architecture reference; content is strictly the real facts already defined
+     in CONTENT.statBar — see the honesty note there. */
+  function StatBar() {
+    var cells = CONTENT.statBar.map(function (s, i) {
+      return '<div class="statbar__cell" data-delay="' + Math.min(i + 1, 4) + '">' +
+        '<b class="statbar__value">' + esc(s.value) + '</b>' +
+        '<span class="statbar__label">' + esc(s.label) + '</span>' +
+      '</div>';
+    }).join("");
+    return '' +
+      // data-no-dissolve-out: the out-observer watches the top 18% of the
+      // viewport, which a 140px-tall bar clears while still fully on screen —
+      // without this it dims to 0.22 in plain sight and reads as a rendering bug.
+      '<section class="statbar reveal" data-no-dissolve-out aria-label="Valley Network at a glance">' +
+        '<div class="wrap statbar__inner">' + cells + '</div>' +
+      '</section>';
+  }
+
+  function Problem() {
+    var c = CONTENT.problem;
+    var items = c.list.map(function (it, i) {
+      return '<li><span class="problem__num">0' + (i + 1) + '</span>' +
+        '<p><strong>' + esc(it.t) + '</strong>' + esc(it.d) + '</p></li>';
+    }).join("");
+
+    // {/* IMAGE SLOT: problem-visual */}
+    // Now a full-bleed SCENE rather than a column in a grid: the clip fills the
+    // frame and the label, headline and statement sit directly on top of it via
+    // the same scrim technique the hero uses. Why Oahu keeps its split grid so
+    // the two sections read differently instead of repeating one treatment.
+    var slot = ImageSlot("problem-visual", {
+      className: "problem__slot",
+      hint: "Scattered cards · blurred screen · full bleed",
+      alt: "A scattered stack of vendor contact cards"
+    });
+
+    return '' +
+      '<section class="section section--sand problem reveal" id="problem">' +
+        '<div class="scene">' +
+          slot +
+          '<div class="scene__scrim"></div>' +
+          '<div class="wrap scene__inner">' +
+            '<p class="label scene__label" data-delay="1">' + esc(c.label) + '</p>' +
+            '<h2 class="h-1 measure-tight scene__title" data-delay="2">' + esc(c.title) + '</h2>' +
+            '<p class="scene__body" data-delay="3">' + esc(c.statement) + '</p>' +
+            '<a class="scene__more" href="#how" data-delay="4">' +
+              'See how it works<span aria-hidden="true"></span></a>' +
+            '<div class="stat-card glass-light" data-delay="4">' +
+              '<b>' + esc(c.stat.big) + '</b><span>' + esc(c.stat.small) + '</span>' +
+            '</div>' +
+          '</div>' +
+        '</div>' +
+        // The three problem points stay on the sand ground below the scene —
+        // full-bleed type over video is for the headline, not for body copy.
+        '<div class="wrap">' +
+          '<ul class="problem__list" data-delay="4">' + items + '</ul>' +
+        '</div>' +
+      '</section>';
+  }
+
+  function About() {
+    var c = CONTENT.about;
+    return '' +
+      '<section class="section section--dark about reveal" id="about">' +
+        '<div class="wrap about__inner">' +
+          '<div>' +
+            '<p class="label" data-delay="1">' + esc(c.label) + '</p>' +
+            '<h2 class="h-2" data-delay="2">' + esc(c.heading) + '</h2>' +
+          '</div>' +
+          '<div class="about__card glass" data-delay="3">' +
+            // Provided paragraph, verbatim.
+            '<p class="about__quote">' + esc(c.paragraph) + '</p>' +
+            '<p class="about__sig">' + esc(c.sig) + '</p>' +
+          '</div>' +
+        '</div>' +
+      '</section>';
+  }
+
+  function Track(t, variant) {
+    // Horizontal numbered process: circular badges joined by a thin line, one
+    // row per track. Step copy is untouched — this is layout only.
+    var steps = t.steps.map(function (s, i) {
+      return '<li class="step">' +
+        '<span class="step__badge" aria-hidden="true">0' + (i + 1) + '</span>' +
+        '<p class="step__text">' + esc(s) + '</p>' +
+      '</li>';
+    }).join("");
+    return '' +
+      '<article class="track glass-light">' +
+        '<p class="track__tag">' + esc(t.tag) + '</p>' +
+        '<h3 class="h-3">' + esc(t.headline) + '</h3>' +
+        '<p class="track__price">' + esc(t.price) + '</p>' +
+        '<ol class="track__steps">' + steps + '</ol>' +
+        '<div class="track__cta">' +
+          '<a class="btn btn--ink btn--block" href="#waitlist" data-open-tab="' + variant + '">' +
+            esc(t.cta) + '</a>' +
+        '</div>' +
+      '</article>';
+  }
+
+  function HowItWorks() {
+    var c = CONTENT.how;
+    return '' +
+      '<section class="section section--sand-deep how reveal" id="how">' +
+        '<div class="wrap how__layout">' +
+          // Pins on desktop and holds while both tracks pass — the one sticky
+          // moment on the page. Delays sit on the pieces inside, never on the
+          // sticky element itself: a transform on it would fight the pinning.
+          '<div class="how__pin">' +
+            '<p class="label" data-delay="1">' + esc(c.label) + '</p>' +
+            '<h2 class="h-1 measure-tight" data-delay="2">' + esc(c.title) + '</h2>' +
+            '<p class="lede muted measure" style="margin-top:20px" data-delay="3">' + esc(c.intro) + '</p>' +
+          '</div>' +
+          '<div class="tracks" data-delay="4">' +
+            Track(c.agent, "agent") + Track(c.vendor, "vendor") +
+          '</div>' +
+        '</div>' +
+      '</section>';
+  }
+
+  function WhyHawaii() {
+    var c = CONTENT.why;
+    var pts = c.points.map(function (p) {
+      return '<div class="why__point"><h3>' + esc(p.t) + '</h3><p>' + esc(p.d) + '</p></div>';
+    }).join("");
+
+    // {/* IMAGE SLOT: why-hawaii-detail */}
+    // The page's one FEATURED video — player: true gives it visible controls and
+    // stops it autoplaying, so it reads as something you choose to watch.
+    var slot = ImageSlot("why-hawaii-detail", {
+      hint: "Material detail · natural light · 4:3",
+      className: "why__slot",
+      alt: "Aged brass door hardware resting on linen and stone in soft natural light",
+      player: true
+    });
+
+    // Real vendor categories, surfaced here instead of staying buried in the
+    // waitlist dropdown. Same array the form is built from — one source of truth.
+    var tags = CONTENT.waitlist.vendor.categories.map(function (cat) {
+      return '<li class="cat">' + esc(cat) + '</li>';
+    }).join("");
+
+    // Split grid retained here on purpose — the Problem section is the
+    // full-bleed scene, so these two sections do not read the same way.
+    return '' +
+      '<section class="section section--dark why reveal" id="why">' +
+        '<div class="wrap why__grid">' +
+          '<div>' +
+            '<p class="label" data-delay="1">' + esc(c.label) + '</p>' +
+            '<h2 class="h-1" data-delay="2">' + esc(c.title) + '</h2>' +
+            '<p class="lede muted measure" style="margin-top:22px" data-delay="3">' + esc(c.body) + '</p>' +
+            '<div class="why__points" data-delay="4">' + pts + '</div>' +
+          '</div>' +
+          '<div class="why__media" data-delay="2">' + slot + '</div>' +
+        '</div>' +
+        '<div class="wrap why__cats" data-delay="4">' +
+          '<p class="label">' + esc(c.categoriesLabel) + '</p>' +
+          '<p class="why__cats-note muted">' + esc(c.categoriesNote) + '</p>' +
+          '<ul class="cats">' + tags + '</ul>' +
+        '</div>' +
+      '</section>';
+  }
+
+  function FounderNote() {
+    var c = CONTENT.founder;
+    var paras = c.note.map(function (p) { return '<p>' + esc(p) + '</p>'; }).join("");
+    var img = CONFIG.images["founder-headshot"] || "";
+    // First in source order on purpose: on mobile (no gutter to pull it into)
+    // it simply stays in flow and stacks above the text. On desktop the
+    // absolute positioning in .founder__photo lifts it out of flow and into
+    // the existing 34% left gutter — source order stops mattering there.
+    var photo = img
+      ? '<img class="founder__photo" src="' + esc(img) + '" alt="' + esc(c.photoAlt || "") + '" loading="lazy" />'
+      : "";
+    return '' +
+      '<section class="section section--sand founder reveal" id="founder">' +
+        '<div class="wrap">' +
+          '<div class="founder__inner">' +
+            photo +
+            '<p class="label" data-delay="1">' + esc(c.label) + '</p>' +
+            '<div class="founder__note" data-delay="2">' + paras + '</div>' +
+            '<p class="founder__sign" data-delay="3">' + esc(c.sign) + '</p>' +
+          '</div>' +
+        '</div>' +
+      '</section>';
+  }
+
+  function Field(opts) {
+    var input;
+    if (opts.type === "select") {
+      var options = ['<option value="">Choose a category</option>'].concat(
+        opts.options.map(function (o) { return '<option value="' + esc(o) + '">' + esc(o) + '</option>'; })
+      ).join("");
+      input = '<select id="' + opts.id + '" name="' + opts.name + '">' + options + '</select>';
+    } else {
+      input = '<input type="' + esc(opts.type) + '" id="' + opts.id + '" name="' + opts.name + '"' +
+              ' placeholder="' + esc(opts.placeholder || "") + '"' +
+              ' autocomplete="' + esc(opts.autocomplete || "off") + '" />';
+    }
+    return '' +
+      '<div class="field" data-field="' + opts.name + '">' +
+        '<label for="' + opts.id + '">' + esc(opts.label) + '</label>' + input +
+        '<p class="field__error" id="' + opts.id + '-error" role="alert"></p>' +
+      '</div>';
+  }
+
+  function WaitlistForm(kind) {
+    var c = CONTENT.waitlist[kind];
+    var fields =
+      Field({ id: kind + "-name", name: "name", label: "Full name", type: "text",
+              placeholder: "Your name", autocomplete: "name" }) +
+      Field({ id: kind + "-email", name: "email", label: "Email", type: "email",
+              placeholder: "you@example.com", autocomplete: "email" });
+
+    if (kind === "vendor") {
+      fields += Field({ id: "vendor-category", name: "category", label: "Business type",
+                        type: "select", options: CONTENT.waitlist.vendor.categories });
+    }
+
+    // Web3Forms spam honeypot — never shown to real visitors, so any submission
+    // with it filled in is treated as a bot.
+    fields += '' +
+      '<div class="field botcheck-field">' +
+        '<label for="' + kind + '-botcheck">Do not fill this in</label>' +
+        '<input type="text" id="' + kind + '-botcheck" name="botcheck" tabindex="-1" autocomplete="off" />' +
+      '</div>';
+
+    return '' +
+      '<div class="pane" id="pane-' + kind + '" role="tabpanel" aria-labelledby="tab-' + kind + '">' +
+        '<form novalidate id="form-' + kind + '" data-kind="' + kind + '">' +
+          '<h3 class="h-3" style="margin-bottom:8px">' + esc(c.headline) + '</h3>' +
+          '<p class="muted" style="font-size:15px;margin-bottom:28px">' + esc(c.sub) + '</p>' +
+          fields +
+          '<button type="submit" class="btn btn--brass btn--block">' + esc(c.submit) + '</button>' +
+          '<p class="form__fine">' + esc(c.fine) + '</p>' +
+        '</form>' +
+        '<div class="confirm" id="confirm-' + kind + '" role="status" aria-live="polite">' +
+          '<div class="confirm__mark" aria-hidden="true">&#10003;</div>' +
+          '<h3>' + esc(c.confirmTitle) + '</h3>' +
+          '<p>' + esc(c.confirmBody) + '</p>' +
+          '<button type="button" class="confirm__again" data-reset="' + kind + '">Add another</button>' +
+        '</div>' +
+      '</div>';
+  }
+
+  function Waitlist() {
+    var c = CONTENT.waitlist;
+
+    // {/* IMAGE SLOT: waitlist-background */}
+    // Full-bleed, low opacity, sits behind the frosted form card so the form
+    // floats over real photography instead of a flat color field.
+    var bg = ImageSlot("waitlist-background", {
+      className: "waitlist__slot",
+      hint: "Full bleed · low opacity behind form",
+      alt: ""
+    });
+
+    // data-no-dissolve-out: never fade this section while someone is typing in it.
+    return '' +
+      '<section class="section waitlist reveal" id="waitlist" data-no-dissolve-out>' +
+        bg +
+        '<div class="waitlist__scrim"></div>' +
+        '<div class="wrap waitlist__grid">' +
+          '<div class="waitlist__head">' +
+            '<p class="label" data-delay="1">' + esc(c.label) + '</p>' +
+            '<h2 class="h-1" style="color:var(--sand)" data-delay="2">' + esc(c.title) + '</h2>' +
+            '<p class="lede" style="margin-top:22px" data-delay="3">' + esc(c.body) + '</p>' +
+          '</div>' +
+          '<div class="form-shell glass-light" data-delay="4">' +
+            '<div class="tabs" role="tablist" aria-label="Choose agent or vendor">' +
+              '<button class="tab" role="tab" id="tab-agent" type="button" ' +
+                'aria-selected="true" aria-controls="pane-agent" data-tab="agent">' +
+                esc(c.agent.tabLabel) + '</button>' +
+              '<button class="tab" role="tab" id="tab-vendor" type="button" ' +
+                'aria-selected="false" tabindex="-1" aria-controls="pane-vendor" data-tab="vendor">' +
+                esc(c.vendor.tabLabel) + '</button>' +
+            '</div>' +
+            WaitlistForm("agent") + WaitlistForm("vendor") +
+          '</div>' +
+        '</div>' +
+      '</section>';
+  }
+
+  function Footer() {
+    var c = CONTENT.footer;
+    return '' +
+      // data-no-dissolve-out: the footer is the last thing on the page, so there
+      // is nothing for it to dissolve *under* — fading it while it is being read
+      // would just look like a bug. The copyright row gets no delay of its own.
+      '<footer class="footer reveal" data-no-dissolve-out>' +
+        '<div class="wrap">' +
+          // Closing CTA sits above the contact block so the last thing on the
+          // page is an action, not an address.
+          '<div class="footer__cta" data-delay="1">' +
+            '<div>' +
+              '<h2 class="h-2 footer__cta-title">' + esc(c.ctaTitle) + '</h2>' +
+              '<p class="footer__cta-body">' + esc(c.ctaBody) + '</p>' +
+            '</div>' +
+            '<a class="btn btn--brass" href="#waitlist">' + esc(c.ctaButton) + '</a>' +
+          '</div>' +
+          '<div class="footer__top">' +
+            '<div data-delay="2">' +
+              '<p class="footer__name">' + esc(CONTENT.brand.name) + '</p>' +
+              '<p class="footer__desc">' + esc(c.desc) + '</p>' +
+            '</div>' +
+            // Two real columns only. No social icons — there are no accounts to
+            // link to, and inventing them would be dishonest.
+            '<div class="footer__cols" data-delay="3">' +
+              '<div class="footer__col">' +
+                '<p class="label">' + esc(c.emailLabel) + '</p>' +
+                '<a href="mailto:' + esc(CONFIG.contactEmail) + '">' + esc(CONFIG.contactEmail) + '</a>' +
+              '</div>' +
+              '<div class="footer__col">' +
+                '<p class="label">' + esc(c.locationLabel) + '</p>' +
+                '<span class="footer__plain">' + esc(c.location) + '</span>' +
+              '</div>' +
+            '</div>' +
+          '</div>' +
+          '<div class="footer__bottom">' +
+            '<span>&copy; ' + new Date().getFullYear() + ' Valley Network. Oahu, Hawaii.</span>' +
+            '<span>Built on Oahu, for Oahu.</span>' +
+          '</div>' +
+        '</div>' +
+      '</footer>';
+  }
+
+  /* ==========================================================================
+     RENDER
+     ====================================================================== */
+  function render() {
+    console.log("[Valley Network] rendering sections…");
+    $("#nav-root").innerHTML = Nav();
+    $("#main").innerHTML = [
+      Hero(), StatBar(), Problem(), About(), HowItWorks(), WhyHawaii(), FounderNote(), Waitlist()
+    ].join("");
+    $("#footer-root").innerHTML = Footer();
+    console.log("[Valley Network] sections mounted");
+  }
+
+  /* Single source of truth for the motion preference, used by every effect. */
+  function prefersReduced() {
+    return !!(window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches);
+  }
+
+  /* --------------------------------------------------------------------------
+     VIDEO LOADING — lazy, and paused when off screen.
+     Nothing below the fold fetches a clip on initial load; each one is attached
+     as it approaches the viewport and paused again once it leaves, so four
+     autoplaying videos never compete for bandwidth or battery at once.
+     -------------------------------------------------------------------- */
+  function initMedia() {
+    // The featured player is deliberately excluded: it is user-driven, so it
+    // must not be autoplayed here, nor have its source stripped under reduced
+    // motion — an explicit click to play is a choice, not imposed motion.
+    var vids = $$("video.slot__media:not([data-player])");
+    if (!vids.length) { console.log("[Valley Network] no ambient video slots wired"); return; }
+
+    /* pickArt() runs once at render so the poster is correct before first
+       paint. That leaves one gap: a phone rotated into landscape keeps the
+       portrait asset and crops it hard vertically. Re-resolve when the media
+       query flips. Registered on both the reduced-motion and full paths — a
+       reduced-motion user is looking at the poster and nothing else, so
+       getting its orientation right matters more there, not less.
+       Safe to swap here: something is already painted, so no blank frame. */
+    function watchArtDirection(swapVideo) {
+      if (!CONFIG.portrait || !window.matchMedia) return;
+      var mq = window.matchMedia(CONFIG.portrait.media);
+      var onFlip = function () {
+        $$(".slot[data-slot]").forEach(function (slot) {
+          var key = slot.getAttribute("data-slot");
+          if (!CONFIG.portrait.videos[key] && !CONFIG.portrait.images[key]) return;
+          var v = slot.querySelector("video.slot__media");
+          if (!v) return;
+          var nextImg = pickArt("images", key);
+          if (nextImg) {
+            v.setAttribute("poster", nextImg);
+            // If the clip already failed, the still is being held as a CSS
+            // background — repoint that too or the swap would be invisible.
+            if (v.dataset.fellBack) v.style.backgroundImage = 'url("' + nextImg + '")';
+          }
+          if (!swapVideo) return;
+          var nextVid = pickArt("videos", key);
+          if (nextVid && v.dataset.src !== nextVid) {
+            v.dataset.src = nextVid;
+            if (v.dataset.loaded) { v.src = nextVid; v.load(); v.play().catch(function () {}); }
+          }
+        });
+      };
+      if (mq.addEventListener) mq.addEventListener("change", onFlip);
+      else if (mq.addListener) mq.addListener(onFlip);
+    }
+
+    if (prefersReduced()) {
+      // Never fetch the clip at all — the poster frame is the final image.
+      vids.forEach(function (v) { v.removeAttribute("autoplay"); v.removeAttribute("data-src"); });
+      watchArtDirection(false);   // poster only; there is no clip to swap
+      console.log("[Valley Network] reduced motion: showing", vids.length, "static posters");
+      return;
+    }
+
+    /* A <video> that fails to load stops painting its poster — the element
+       goes transparent and the slot behind it shows through empty. For the
+       hero that means a blank first screen on any 404, codec refusal or
+       blocked request, which is the one failure the poster exists to prevent.
+       Painting the still as a CSS background keeps it visible in that state.
+       Done on the same element rather than swapping in an <img> so the
+       parallax loop keeps its node reference. */
+    function posterFallback(v) {
+      var poster = v.getAttribute("poster");
+      if (!poster || v.dataset.fellBack) return;
+      v.dataset.fellBack = "1";
+      v.style.backgroundImage = 'url("' + poster + '")';
+      v.style.backgroundSize = "cover";
+      v.style.backgroundPosition = getComputedStyle(v).objectPosition || "center";
+      v.style.backgroundRepeat = "no-repeat";
+      console.warn("[Valley Network] clip failed, holding poster:", v.dataset.src || v.src);
+    }
+
+    function activate(v) {
+      try {
+        if (!v.dataset.loaded) {
+          v.dataset.loaded = "1";
+          v.addEventListener("error", function () { posterFallback(v); });
+          v.src = v.dataset.src;
+          v.load();
+        }
+        var p = v.play();
+        // Autoplay can still be refused (iOS low-power, data saver). The poster
+        // stays visible, so a refusal degrades to exactly the static design.
+        if (p && p.catch) {
+          p.catch(function (err) {
+            console.warn("[Valley Network] autoplay refused:", v.dataset.src, err && err.name);
+          });
+        }
+      } catch (err) {
+        console.error("[Valley Network] video activate failed:", err);
+      }
+    }
+
+    if (!("IntersectionObserver" in window)) { vids.forEach(activate); return; }
+
+    var io = new IntersectionObserver(function (entries) {
+      entries.forEach(function (entry) {
+        if (entry.isIntersecting) activate(entry.target);
+        else if (entry.target.dataset.loaded) entry.target.pause();
+      });
+    }, { rootMargin: "300px 0px" });  // begin loading just before it scrolls in
+
+    vids.forEach(function (v) {
+      // Everything is observed so it pauses once off screen — including the
+      // hero, which would otherwise keep decoding while you read the footer.
+      io.observe(v);
+      if (v.dataset.eager) activate(v);   // hero also starts immediately
+    });
+    console.log("[Valley Network] video: 1 eager,", vids.length - 1, "lazy");
+    watchArtDirection(true);   // poster and clip
+  }
+
+  /* --------------------------------------------------------------------------
+     SCROLL-LINKED MOTION — parallax drift + settle-in.
+     Runs off one rAF-throttled scroll listener (never raw scroll), touches only
+     transform and opacity so it stays on the compositor, and skips any slot
+     that is off screen. Layers on top of the section cross-dissolve: a section
+     is still fading up while its visual is already drifting and settling, so
+     the page reads as continuous motion rather than fade-pause-fade.
+     -------------------------------------------------------------------- */
+  function initParallax() {
+    if (prefersReduced() || !window.requestAnimationFrame) {
+      console.log("[Valley Network] scroll-linked motion disabled (reduced motion)");
+      return;
+    }
+    // Featured player excluded — drifting and scale-settling a clip while
+    // someone is deliberately watching it works against the whole point of it.
+    var media = $$(".slot__media:not([data-player])");
+    if (!media.length) return;
+
+    var ticking = false;
+    function clamp(v, a, b) { return v < a ? a : (v > b ? b : v); }
+    function easeOut(t) { return 1 - Math.pow(1 - t, 3); }
+
+    /* The hero is the one section allowed to exceed the page's motion budget.
+       Everything else drifts 7.5% and settles 1.045 -> 1.0; the hero drifts
+       12% and covers 1.10 -> 1.0 -> 1.045. The restraint rule still holds for
+       the other eight sections — this is a deliberate single exception, not a
+       loosening of the standard. */
+    var HERO_DRIFT = 0.09;   // vs 0.075 elsewhere. Fits the 10% CSS headroom.
+    var HERO_INTRO = 1.07;   // load-time settle start, vs 1.045 elsewhere
+    var HERO_EXIT  = 0.045;  // extra scale picked up as the hero leaves
+    var INTRO_MS   = 1800;
+
+    var heroMedia = document.querySelector(".hero__slot .slot__media");
+    /* Why the hero needs its own intro term at all: the shared `enter` factor
+       is driven by how far a slot has travelled up the viewport. The hero
+       starts at the top of the document, so at load `enter` is already 1 and
+       the shared scale-settle is over before it begins — the hero has never
+       actually played one. This drives it from elapsed time instead. */
+    var heroIntro = heroMedia ? 0 : 1;
+
+    function update() {
+      ticking = false;
+      var vh = window.innerHeight;
+
+      media.forEach(function (el) {
+        var slot = el.parentElement;
+        var r = slot.getBoundingClientRect();
+        // Cheap bail-out: nothing to compute for slots nowhere near the screen.
+        if (r.bottom < -200 || r.top > vh + 200) return;
+
+        var isHero = (el === heroMedia);
+
+        // How far this slot has travelled through the viewport: 0 as its top
+        // edge touches the bottom, 1 once its bottom edge clears the top.
+        var p = clamp((vh - r.top) / (vh + r.height), 0, 1);
+
+        // Drift against the scroll, bounded by the headroom the CSS reserves
+        // — roughly 15% of scroll speed, so it reads as depth, not detachment.
+        var drift = (0.5 - p) * 2 * (r.height * (isHero ? HERO_DRIFT : 0.075));
+
+        var scale, opacity;
+        if (isHero) {
+          // Settle in from the timed intro, then pick scale back up on the way
+          // out so scrolling away from the hero has depth of its own.
+          var intro = HERO_INTRO - (HERO_INTRO - 1) * easeOut(heroIntro);
+          var exit  = easeOut(clamp(-r.top / vh, 0, 1));
+          scale = intro * (1 + HERO_EXIT * exit);
+          // Never fades: it is the first thing on screen and must be at full
+          // strength immediately.
+          opacity = 1;
+        } else {
+          // Settle: eases from 1.045 down to 1.0 and fades up as the slot arrives.
+          var enter = easeOut(clamp((vh - r.top) / (vh * 0.62), 0, 1));
+          scale = 1.045 - 0.045 * enter;
+          opacity = 0.55 + 0.45 * enter;
+        }
+
+        el.style.transform = "translate3d(0," + drift.toFixed(2) + "px,0) scale(" + scale.toFixed(4) + ")";
+        el.style.opacity = opacity.toFixed(3);
+      });
+    }
+
+    // Drives the hero's load-time settle. Runs for INTRO_MS and then stops —
+    // after that the hero is scroll-driven like everything else.
+    if (heroMedia) {
+      var introStart = null;
+      (function introTick(ts) {
+        if (introStart === null) introStart = ts || 0;
+        heroIntro = clamp(((ts || 0) - introStart) / INTRO_MS, 0, 1);
+        update();
+        if (heroIntro < 1) window.requestAnimationFrame(introTick);
+      })(0);
+    }
+
+    function onScroll() {
+      if (!ticking) { ticking = true; window.requestAnimationFrame(update); }
+    }
+
+    window.addEventListener("scroll", onScroll, { passive: true });
+    window.addEventListener("resize", onScroll, { passive: true });
+    window.addEventListener("orientationchange", onScroll, { passive: true });
+    update();   // set the opening frame so nothing pops on first paint
+    console.log("[Valley Network] scroll-linked motion on", media.length, "visuals");
+  }
+
+  /* --------------------------------------------------------------------------
+     CROSS-DISSOLVE — two IntersectionObservers.
+     IN: fade + lift the arriving section (520ms).
+     OUT: fade the departing section down WHILE it is still on screen, so the
+          two overlap. The out-observer watches only the top band of the
+          viewport; a section is "out" once it has cleared that band but is
+          still partly visible — which is what makes it read as a dissolve
+          rather than a cut.
+     -------------------------------------------------------------------- */
+  function initReveal() {
+    var reduced = prefersReduced();
+    var targets = $$(".reveal");
+
+    if (reduced || !("IntersectionObserver" in window)) {
+      // is-clear too, so no section is left carrying a filter it never needed.
+      targets.forEach(function (el) { el.classList.add("is-in", "is-clear"); });
+      console.log("[Valley Network] dissolve disabled (reduced motion or no IO support)");
+      return;
+    }
+
+    /* Longest possible entrance: the last child delay (320ms) plus its own
+       560ms transition, rounded up. After that the blur has no work left to do
+       and `is-clear` drops the filter entirely — see the CSS note. */
+    var CLEAR_AFTER = 950;
+
+    function markIn(el) {
+      el.classList.add("is-in");
+      window.setTimeout(function () { el.classList.add("is-clear"); }, CLEAR_AFTER);
+    }
+
+    var inIO = new IntersectionObserver(function (entries) {
+      entries.forEach(function (entry) {
+        if (entry.isIntersecting) {
+          markIn(entry.target);
+          inIO.unobserve(entry.target); // one-way; never flickers back out
+        }
+      });
+    }, { threshold: 0.10, rootMargin: "0px 0px -8% 0px" });
+
+    var outIO = new IntersectionObserver(function (entries) {
+      entries.forEach(function (entry) {
+        var pastTop = entry.boundingClientRect.top < 0;
+        entry.target.classList.toggle("is-out", !entry.isIntersecting && pastTop);
+      });
+    }, { threshold: 0, rootMargin: "0px 0px -82% 0px" });
+
+    targets.forEach(function (el) {
+      inIO.observe(el);
+      if (!el.hasAttribute("data-no-dissolve-out")) outIO.observe(el);
+    });
+    console.log("[Valley Network] cross-dissolve active on", targets.length, "sections");
+
+    /* Safety net. IntersectionObserver is suspended while a tab is hidden, so a
+       page opened in a background tab (or restored from a session) can sit at
+       opacity 0 with no callback to wake it. Reveal anything already in view
+       that the observer hasn't handled — the dissolve still runs normally for
+       everything below the fold. */
+    function rescueVisible(reason) {
+      var rescued = 0;
+      targets.forEach(function (el) {
+        if (el.classList.contains("is-in")) return;
+        var r = el.getBoundingClientRect();
+        if (r.top < window.innerHeight && r.bottom > 0) { markIn(el); rescued++; }
+      });
+      if (rescued) console.log("[Valley Network] revealed", rescued, "section(s) via safety net:", reason);
+    }
+    setTimeout(function () { rescueVisible("timeout"); }, 1800);
+    document.addEventListener("visibilitychange", function () {
+      if (!document.hidden) rescueVisible("tab became visible");
+    });
+  }
+
+  /* --------------------------------------------------------------------------
+     CURSOR-REACTIVE CARD GLOW — pointer position feeds two custom properties
+     the CSS radial gradient reads. Gated three ways: reduced motion, a real
+     hover-capable fine pointer (never touch, where a "hover" glow would latch
+     on after a tap), and the form shell is skipped so nothing chases the cursor
+     across the inputs. Writes are rAF-throttled and touch only custom
+     properties, so a pointermove never triggers layout.
+     -------------------------------------------------------------------- */
+  function initCardGlow() {
+    if (prefersReduced()) { console.log("[Valley Network] card glow off (reduced motion)"); return; }
+    if (!window.matchMedia || !window.matchMedia("(hover: hover) and (pointer: fine)").matches) {
+      console.log("[Valley Network] card glow off (no fine pointer)");
+      return;
+    }
+
+    var cards = $$(".glass, .glass-light").filter(function (card) {
+      return !card.classList.contains("form-shell");
+    });
+
+    cards.forEach(function (card) {
+      var queued = false, x = 0, y = 0;
+      card.addEventListener("pointermove", function (e) {
+        var r = card.getBoundingClientRect();
+        x = e.clientX - r.left;
+        y = e.clientY - r.top;
+        if (queued) return;
+        queued = true;
+        window.requestAnimationFrame(function () {
+          queued = false;
+          card.style.setProperty("--mx", x.toFixed(1) + "px");
+          card.style.setProperty("--my", y.toFixed(1) + "px");
+        });
+      }, { passive: true });
+    });
+    console.log("[Valley Network] card glow active on", cards.length, "cards");
+  }
+
+  /* --------------------------------------------------------------------------
+     FEATURED VIDEO PLAYER — the one "watch this" moment on the page.
+     Starts paused on its poster; the source is only fetched on the first play,
+     so this costs nothing until someone asks for it. Deliberately minimal:
+     play/pause, a progress indicator, and elapsed / duration.
+     -------------------------------------------------------------------- */
+  function initVideoPlayer() {
+    var players = $$("video[data-player]");
+    if (!players.length) return;
+
+    function fmt(t) {
+      if (!isFinite(t) || t < 0) t = 0;
+      var m = Math.floor(t / 60), s = Math.floor(t % 60);
+      return m + ":" + (s < 10 ? "0" : "") + s;
+    }
+
+    players.forEach(function (v) {
+      var fig    = v.closest(".slot");
+      var toggles = $$("[data-vp-toggle]", fig);
+      var fill   = $("[data-vp-fill]", fig);
+      var track  = $("[data-vp-track]", fig);
+      var time   = $("[data-vp-time]", fig);
+      if (!toggles.length) return;
+
+      function syncLabels() {
+        var playing = !v.paused && !v.ended;
+        fig.classList.toggle("is-playing", playing);
+        toggles.forEach(function (b) {
+          b.setAttribute("aria-label", playing ? "Pause video" : "Play video");
+        });
+      }
+
+      function tick() {
+        var d = v.duration;
+        var pct = (isFinite(d) && d > 0) ? (v.currentTime / d) * 100 : 0;
+        if (fill) fill.style.width = pct.toFixed(2) + "%";
+        if (track) track.setAttribute("aria-valuenow", Math.round(pct));
+        if (time) time.textContent = fmt(v.currentTime) + " / " + fmt(isFinite(d) ? d : 0);
+      }
+
+      function toggle() {
+        try {
+          if (v.paused) {
+            // Source attaches on first play only — nothing is fetched before this.
+            if (!v.dataset.loaded) {
+              v.dataset.loaded = "1";
+              v.src = v.dataset.src;
+              v.load();
+            }
+            var p = v.play();
+            if (p && p.catch) {
+              p.catch(function (err) {
+                console.warn("[Valley Network] featured video play refused:", err && err.name);
+                syncLabels();
+              });
+            }
+          } else {
+            v.pause();
+          }
+        } catch (err) {
+          console.error("[Valley Network] featured video toggle failed:", err);
+        }
+      }
+
+      toggles.forEach(function (b) { b.addEventListener("click", toggle); });
+      ["play", "pause", "ended"].forEach(function (evt) {
+        v.addEventListener(evt, function () { syncLabels(); tick(); });
+      });
+      v.addEventListener("timeupdate", tick);
+      v.addEventListener("loadedmetadata", tick);
+
+      // Pause when it scrolls away — no point decoding a clip nobody can see.
+      if ("IntersectionObserver" in window) {
+        new IntersectionObserver(function (entries) {
+          entries.forEach(function (e) { if (!e.isIntersecting && !v.paused) v.pause(); });
+        }, { threshold: 0 }).observe(v);
+      }
+
+      syncLabels();
+      tick();
+    });
+    console.log("[Valley Network] featured video player ready on", players.length, "slot(s)");
+  }
+
+  function initNav() {
+    var nav = $("#nav");
+    if (!nav) return;
+    var onScroll = function () { nav.classList.toggle("is-scrolled", window.scrollY > 40); };
+    window.addEventListener("scroll", onScroll, { passive: true });
+    onScroll();
+  }
+
+  /* --------------------------------------------------------------------------
+     Waitlist tabs — click + arrow keys, standard ARIA tab pattern.
+     -------------------------------------------------------------------- */
+  var KINDS = ["agent", "vendor"];
+
+  var SWAP_OUT = 150;     // matches .pane.is-swapping-out
+  var tabSwapTimer = null;
+  var currentTab = null;
+
+  /* Crossfade between panes. ARIA state flips immediately — assistive tech must
+     never wait on an animation — while only the visual swap is deferred.
+     `immediate` covers the first call and reduced motion, where the pane is
+     switched in one frame with no transition at all. */
+  function selectTab(kind, immediate) {
+    if (KINDS.indexOf(kind) === -1) return;
+    if (kind === currentTab) return;
+
+    var previous = currentTab;
+    currentTab = kind;
+
+    KINDS.forEach(function (k) {
+      var tab = $("#tab-" + k);
+      if (!tab) return;
+      tab.setAttribute("aria-selected", k === kind ? "true" : "false");
+      tab.tabIndex = k === kind ? 0 : -1;
+    });
+
+    var incoming = $("#pane-" + kind);
+    var outgoing = previous ? $("#pane-" + previous) : null;
+    if (!incoming) return;
+
+    if (tabSwapTimer) { window.clearTimeout(tabSwapTimer); tabSwapTimer = null; }
+
+    function show() {
+      KINDS.forEach(function (k) {
+        var pane = $("#pane-" + k);
+        if (pane) { pane.hidden = k !== kind; pane.classList.remove("is-swapping-out"); }
+      });
+    }
+
+    if (immediate || prefersReduced() || !outgoing) {
+      show();
+      console.log("[Valley Network] waitlist tab →", kind, immediate ? "(no transition)" : "");
+      return;
+    }
+
+    outgoing.classList.add("is-swapping-out");
+    tabSwapTimer = window.setTimeout(function () {
+      tabSwapTimer = null;
+      show();
+      // Start the incoming pane offset, then release it on the next frame so
+      // the browser has a previous style to interpolate from.
+      incoming.classList.add("is-swapping-in");
+      window.requestAnimationFrame(function () {
+        window.requestAnimationFrame(function () {
+          incoming.classList.remove("is-swapping-in");
+        });
+      });
+    }, SWAP_OUT);
+
+    console.log("[Valley Network] waitlist tab →", kind);
+  }
+
+  function initTabs() {
+    $$(".tab").forEach(function (tab) {
+      tab.addEventListener("click", function () { selectTab(tab.dataset.tab); });
+      tab.addEventListener("keydown", function (e) {
+        if (e.key !== "ArrowRight" && e.key !== "ArrowLeft") return;
+        e.preventDefault();
+        var next = tab.dataset.tab === "agent" ? "vendor" : "agent";
+        selectTab(next);
+        var el = $("#tab-" + next);
+        if (el) el.focus();
+      });
+    });
+    $$("[data-open-tab]").forEach(function (link) {
+      link.addEventListener("click", function () { selectTab(link.getAttribute("data-open-tab")); });
+    });
+    selectTab("agent", true);   // first paint: no crossfade
+  }
+
+  /* --------------------------------------------------------------------------
+     Validation + submit. Client-side only; entries are kept in localStorage
+     so nothing is silently lost before a backend exists.
+     -------------------------------------------------------------------- */
+  var EMAIL_RE = /^[^\s@]+@[^\s@]+\.[a-z]{2,}$/i;
+
+  function setError(form, name, message) {
+    var field = form.querySelector('[data-field="' + name + '"]');
+    if (!field) return;
+    field.classList.toggle("has-error", Boolean(message));
+    var err = field.querySelector(".field__error");
+    if (err) err.textContent = message || "";
+    var input = field.querySelector("input, select");
+    if (input) input.setAttribute("aria-invalid", message ? "true" : "false");
+  }
+
+  function validate(form, kind) {
+    var data = {
+      name: (form.elements.name.value || "").trim(),
+      email: (form.elements.email.value || "").trim()
+    };
+    if (kind === "vendor") data.category = form.elements.category.value || "";
+
+    var errors = {};
+    if (data.name.length < 2) errors.name = "Please enter your name.";
+    if (!EMAIL_RE.test(data.email)) errors.email = "Please enter a valid email address.";
+    if (kind === "vendor" && !data.category) errors.category = "Please pick your business type.";
+
+    ["name", "email", "category"].forEach(function (f) { setError(form, f, errors[f]); });
+    return { data: data, errors: errors, ok: Object.keys(errors).length === 0 };
+  }
+
+  function save(kind, data) {
+    try {
+      var key = "vn_waitlist";
+      var all = JSON.parse(localStorage.getItem(key) || "[]");
+      all.push({ kind: kind, data: data, at: new Date().toISOString() });
+      localStorage.setItem(key, JSON.stringify(all));
+      console.log("[Valley Network] saved locally. total entries:", all.length);
+    } catch (err) {
+      console.warn("[Valley Network] local save unavailable:", err && err.message);
+    }
+  }
+
+  function initForms() {
+    KINDS.forEach(function (kind) {
+      var form = $("#form-" + kind), confirm = $("#confirm-" + kind);
+      if (!form || !confirm) {
+        console.error("[Valley Network] missing form or confirmation for:", kind);
+        return;
+      }
+
+      form.addEventListener("submit", function (e) {
+        e.preventDefault();
+        try {
+          var result = validate(form, kind);
+          if (!result.ok) {
+            console.log("[Valley Network] validation failed:", result.errors);
+            var firstBad = form.querySelector(".has-error input, .has-error select");
+            if (firstBad) firstBad.focus();
+            return;
+          }
+          console.log("[Valley Network] submit ok:", kind, result.data);
+          // Backup copy — kept even though the real destination is the email
+          // below, so nothing is lost if the network request ever fails.
+          save(kind, result.data);
+
+          var payload = {
+            access_key: CONFIG.web3formsKey,
+            subject: kind === "agent"
+              ? "New Agent Waitlist Signup — Valley Network"
+              : "New Vendor Waitlist Signup — Valley Network",
+            name: result.data.name,
+            email: result.data.email,
+            botcheck: form.elements.botcheck ? form.elements.botcheck.value : ""
+          };
+          if (kind === "vendor") payload.category = result.data.category;
+
+          fetch("https://api.web3forms.com/submit", {
+            method: "POST",
+            headers: { "Content-Type": "application/json", "Accept": "application/json" },
+            body: JSON.stringify(payload)
+          })
+            .then(function (res) { return res.json(); })
+            .then(function (json) {
+              if (!json || !json.success) throw new Error((json && json.message) || "Web3Forms submission failed");
+              form.style.display = "none";
+              confirm.classList.add("is-visible");
+              confirm.setAttribute("tabindex", "-1");
+              confirm.focus();
+              // One frame later, so the children have a computed style to
+              // transition *from* — a transition cannot start in the same frame
+              // the element leaves display:none.
+              window.requestAnimationFrame(function () {
+                window.requestAnimationFrame(function () {
+                  confirm.classList.add("is-revealed");
+                });
+              });
+            })
+            .catch(function (err) {
+              console.error("[Valley Network] Web3Forms submit failed:", err);
+              alert("Something went wrong submitting that. Please email " + CONFIG.contactEmail + " and we'll add you manually.");
+            });
+        } catch (err) {
+          console.error("[Valley Network] submit failed:", err);
+          alert("Something went wrong submitting that. Please email " + CONFIG.contactEmail + " and we'll add you manually.");
+        }
+      });
+
+      $$("input, select", form).forEach(function (input) {
+        input.addEventListener("input", function () { setError(form, input.name, ""); });
+      });
+
+      var again = confirm.querySelector('[data-reset="' + kind + '"]');
+      if (again) {
+        again.addEventListener("click", function () {
+          form.reset();
+          ["name", "email", "category"].forEach(function (f) { setError(form, f, ""); });
+          confirm.classList.remove("is-visible", "is-revealed");
+          form.style.display = "";
+          var first = form.querySelector("input");
+          if (first) first.focus();
+          console.log("[Valley Network] form reset:", kind);
+        });
+      }
+    });
+  }
+
+  function init() {
+    try {
+      render();
+      initNav();
+      initMedia();
+      initParallax();
+      initReveal();
+      initVideoPlayer();
+      initCardGlow();
+      initTabs();
+      initForms();
+      console.log("[Valley Network] ready");
+    } catch (err) {
+      console.error("[Valley Network] init failed:", err);
+      // Never leave a blank page behind a JS error.
+      document.documentElement.classList.remove("js");
+      $$(".reveal").forEach(function (el) { el.classList.add("is-in"); });
+    }
+  }
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", init);
+  } else {
+    init();
+  }
+})();
+</script>
+</body>
+</html>
